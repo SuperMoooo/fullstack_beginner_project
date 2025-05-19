@@ -1,10 +1,13 @@
 import Link from 'next/link';
 import React from 'react';
 
-export default function Sidebar() {
+export default function Sidebar({ selected }: { selected: number }) {
     return (
         <aside className="flex items-start justify-center gap-6 px-16 flex-col border-r border-gray-200 *:text-2xl *:flex *:items-center *:justify-center *:gap-2">
-            <Link href={{ pathname: '/' }}>
+            <Link
+                href={{ pathname: '/' }}
+                className={selected == 0 ? 'underline' : ''}
+            >
                 <svg
                     aria-hidden="true"
                     fill="none"
@@ -15,14 +18,18 @@ export default function Sidebar() {
                     className="w-6 h-6"
                 >
                     <path
-                        d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z"
+                        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                     />
                 </svg>
+
                 <p>Eventos</p>
             </Link>
-            <Link href={{ pathname: '/pdfs' }}>
+            <Link
+                href={{ pathname: '/pdfs' }}
+                className={selected == 1 ? 'underline' : ''}
+            >
                 <svg
                     aria-hidden="true"
                     fill="none"
@@ -40,7 +47,10 @@ export default function Sidebar() {
                 </svg>
                 <p>PDF</p>
             </Link>
-            <Link href={{ pathname: '/conta' }}>
+            <Link
+                href={{ pathname: '/validar_bilhete' }}
+                className={selected == 2 ? 'underline' : ''}
+            >
                 <svg
                     aria-hidden="true"
                     fill="none"
@@ -51,12 +61,12 @@ export default function Sidebar() {
                     className="w-6 h-6"
                 >
                     <path
-                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                        d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 0 1 0 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 0 1 0-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375Z"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                     />
                 </svg>
-                <p>Conta</p>
+                <p>Validar Bilhete</p>
             </Link>
         </aside>
     );

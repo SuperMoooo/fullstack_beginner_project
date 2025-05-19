@@ -38,7 +38,8 @@ export default function LoginPage() {
                 localStorage.setItem('token_limite', limite.toString());
                 router.replace('/');
             } else {
-                alert('Verifique as suas credenciais');
+                const errorData = await response.json();
+                alert(errorData['Erro'] || 'Erro desconhecido');
             }
         } catch (error) {
             alert('Erro ao fazer login');
@@ -61,10 +62,19 @@ export default function LoginPage() {
                 />
                 <input
                     className="border-b border-gray-300 w-full  outline-none"
-                    type="text"
+                    type="password"
                     placeholder="Password"
                     onChange={(e) => setPassword(e.target.value)}
                 />
+                <div className="flex items-cente justify-start w-full">
+                    <Link
+                        href={{ pathname: '/forgot_password' }}
+                        className="text-xs text-black opacity-40 underline cursor-pointer"
+                    >
+                        Esqueci Password
+                    </Link>
+                </div>
+
                 <button
                     className="border rounded-2xl text-white bg-blue-500 p-4 w-full cursor-pointer"
                     type="submit"
