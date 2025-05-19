@@ -16,7 +16,7 @@ def verify_auth():
     # SE O REQUEST FOR ALGO RELACIONADO Á AUTH ENTÂO IGNORA, SENÃO, VERIFICA SEM TEM TOKEN DE AUTH
     if request.path != "/login" and request.path != "/register" and request.path != "/alterar-password":
         auth = request.authorization
-        if auth.token != "83e395725af4e8ccf208f91b8d84ac2257d8c772":
+        if auth.token != "Bearer 83e395725af4e8ccf208f91b8d84ac2257d8c772":
             return jsonify({"Erro": "Não Autenticado"}), 401
     else:
         pass
@@ -87,11 +87,23 @@ def alterar_password():
 
 # ::::::::::::: EVENTO ::::::::::::::::
 
+# RETORNA TODOS OS EVENTOS
 @app.route("/eventos", methods=['GET'])
 def get_eventos():
     try:
         data = EventDatabase.get_eventos()
         return jsonify({"Data": data})
+    except Exception as e:
+        return jsonify({"Erro" : str(e)}), 400
+
+# RETORNA EVENTO PELO ID
+@app.route("/evento/<int:id>", methods=['GET'])
+def get_evento(id):
+    try:
+        data = EventDatabase.get_evento(id)
+        if data is None:
+            return jsonify({"Erro" : "Evento não encontrado"}), 404
+        return jsonify({"Sucesso": data})
     except Exception as e:
         return jsonify({"Erro" : str(e)}), 400
 

@@ -8,6 +8,8 @@ class UserModel:
 
     # CONSTRUTOR
     def __init__(self, nome, email, password):
+        if nome == '':
+            raise Exception('O nome não pode ser vazio')
         self.nome = nome
         if not self.verificar_email(email):
             raise Exception('Email invalido!')
@@ -31,6 +33,8 @@ class UserModel:
     # SETS
 
     def set_nome(self, nome):
+        if nome == '':
+            raise Exception('O nome não pode ser vazio')
         self.nome = nome
 
     def set_email(self, email):
