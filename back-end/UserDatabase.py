@@ -40,17 +40,17 @@ class UserDatabase:
             collection = mydb["users"]
             if self.verificar_user_exists():
                 raise Exception('Este nome de utilizador já existe!')
-            collection.insert_one(self.user.__dict__)
+            collection.insert_one(self.get_user().__dict__)
             return True
         except Exception as e:
             print(e)
-            return False
+            raise
 
     # VERIFICAR SE NOME DE UTILIZADOR JÁ EXISTE
     def verificar_user_exists(self) -> bool:
         data = self.get_users()
         for user in data:
-            if self.user.get_nome().nome in user.values():
+            if self.get_user().get_nome() in user["nome"]:
                 return True
         return False
 
@@ -78,14 +78,10 @@ class UserDatabase:
     # ALTERAR PASSWORD
     def alterar_password(self, password) -> bool:
         try:
-            # VERIFICAR SE USER EXISTE
-            user = self.get_user_by_nome(self.get_user().nome)
-            if user is None:
-                raise Exception('User not found!')
             client = MongoClient("mongodb://localhost:27017/")
             mydb = client["2_freq"]
             collection = mydb["users"]
-            collection.update_one({"nome": user.nome}, {"$set": {"password": password}})
+            collection.update_one({"nome": self.get_user().get_nome()}, {"$set": {"password": password}})
             return True
         except Exception as e:
             print(e)
