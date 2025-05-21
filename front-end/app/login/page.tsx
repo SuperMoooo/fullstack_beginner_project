@@ -36,6 +36,7 @@ export default function LoginPage() {
                 const limite = Date.now() + 60 * 60 * 1000; // 1 hora de limite
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('token_limite', limite.toString());
+                localStorage.setItem('tipo', data.tipo);
                 router.replace('/');
             } else {
                 const errorData = await response.json();

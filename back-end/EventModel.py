@@ -3,16 +3,19 @@ from datetime import datetime
 from AtividadesModel import AtividadesModel
 from ParticipanteModel import ParticipanteModel
 from EventDatabase import EventDatabase
+from pymongo import MongoClient
+from UserModel import UserModel
 
 class EventModel:
     id : int
     nome_evento : str
     data_evento : datetime
-    lista_ativades : list[AtividadesModel]
-    lista_participantes : list[ParticipanteModel]
+    lista_atividades : list[AtividadesModel]
+    lista_utilizadores : list[UserModel]
+    comentarios : list[str]
 
     # CONSTRUTOR
-    def __init__(self, nome_evento, data_evento, lista_atividades, lista_participantes):
+    def __init__(self, nome_evento, data_evento, lista_atividades, lista_utilizadores, comentarios):
         id = EventModel.get_id()
         self.id = id
         if nome_evento == '':
@@ -24,9 +27,9 @@ class EventModel:
         if not lista_atividades :
             raise Exception("Lista de Atividades vazia")
         self.lista_atividades = lista_atividades
-        if not lista_participantes :
-            raise Exception("Lista de Participantes vazia")
-        self.lista_participantes = lista_participantes
+
+        self.lista_utilizadores = lista_utilizadores
+        self.comentarios = comentarios
 
     # ENCAPSULAMENTO
 
@@ -41,8 +44,11 @@ class EventModel:
     def get_lista_atividades(self):
         return self.lista_atividades
 
-    def get_lista_participantes(self):
-        return self.lista_participantes
+    def get_lista_utilizadores(self):
+        return self.lista_utilizadores
+
+    def get_comentarios(self):
+        return self.comentarios
 
     # SETS
 
@@ -61,10 +67,11 @@ class EventModel:
             raise Exception("Lista de Atividades vazia")
         self.lista_atividades = lista_atividades
 
-    def set_lista_participantes(self, lista_participantes):
-        if not lista_participantes :
-            raise Exception("Lista de Participantes vazia")
-        self.lista_participantes = lista_participantes
+    def set_lista_utilizadores(self, lista_utilizadores):
+        self.lista_utilizadores = lista_utilizadores
+
+    def set_comentarios(self, comentarios):
+        self.comentarios = comentarios
 
     # FIM ENCAPSULAMENTO
 
@@ -76,5 +83,9 @@ class EventModel:
 
     @staticmethod
     def get_id() -> int:
-        last_id = EventDatabase.get_event_last_id()
+        client = MongoClient("mongodb://localhost:27017/")
+        db = client["2_freq"]
+        collEvents = db["events"]
+
+        last_id = EventDatabase.get_event_last_id(collEvents)
         return last_id + 1

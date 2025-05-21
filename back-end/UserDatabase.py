@@ -1,11 +1,11 @@
 from pymongo import MongoClient
-from UserModel import UserModel
+from TipoUserModel import TipoUserModel
 class UserDatabase:
     # VARS
-    user : UserModel
+    user : TipoUserModel
 
     # CONSTRUTOR
-    def __init__(self, user: UserModel):
+    def __init__(self, user: TipoUserModel):
         self.user = user
 
     # ENCAPSULAMENTO
@@ -15,7 +15,7 @@ class UserDatabase:
     def get_user(self):
         return self.user
 
-    def set_user(self, user: UserModel):
+    def set_user(self, user: TipoUserModel):
         self.user = user
 
     # FUNÇÕES
@@ -33,12 +33,9 @@ class UserDatabase:
 
     # ADICIONAR USER (SE JÁ NÃO EXISTIR) Á DB
 
-    def criar_user(self) -> bool:
+    def criar_user(self, collection) -> bool:
         try:
-            client = MongoClient("mongodb://localhost:27017/")
-            mydb = client["2_freq"]
-            collection = mydb["users"]
-            if self.verificar_user_exists():
+            if self.verificar_user_exists(collection):
                 raise Exception('Este nome de utilizador já existe!')
             collection.insert_one(self.get_user().__dict__)
             return True
@@ -47,8 +44,8 @@ class UserDatabase:
             raise
 
     # VERIFICAR SE NOME DE UTILIZADOR JÁ EXISTE
-    def verificar_user_exists(self) -> bool:
-        data = self.get_users()
+    def verificar_user_exists(self, collection) -> bool:
+        data = self.get_users(collection)
         for user in data:
             if self.get_user().get_nome() in user["nome"]:
                 return True
@@ -56,31 +53,22 @@ class UserDatabase:
 
 
     # RECEBER TODOS OS USERS DA DB
-    def get_users(self) :
-        client = MongoClient("mongodb://localhost:27017/")
-        mydb = client["2_freq"]
-        collection = mydb["users"]
+    def get_users(self, collection) :
         result = collection.find({})
         return result
 
     # RETORNAR USER BY NOME
     @staticmethod
-    def get_user_by_nome(nome) -> UserModel | None:
-        client = MongoClient("mongodb://localhost:27017/")
-        mydb = client["2_freq"]
-        collection = mydb["users"]
+    def get_user_by_nome(nome, collection) -> TipoUserModel | None:
         result = collection.find({})
         for user in result:
             if nome == user["nome"]:
-                return UserModel(user["nome"], user["email"], user["password"])
+                return TipoUserModel(user["nome"], user["email"], user["data_nascimento"], user["password"], user["tipo"])
         return None
 
     # ALTERAR PASSWORD
-    def alterar_password(self, password) -> bool:
+    def alterar_password(self, password, collection) -> bool:
         try:
-            client = MongoClient("mongodb://localhost:27017/")
-            mydb = client["2_freq"]
-            collection = mydb["users"]
             collection.update_one({"nome": self.get_user().get_nome()}, {"$set": {"password": password}})
             return True
         except Exception as e:

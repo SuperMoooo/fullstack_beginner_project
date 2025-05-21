@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-
+from ParticipanteModel import ParticipanteModel
 
 class AtividadesModel:
 
@@ -10,6 +10,7 @@ class AtividadesModel:
     hora_atividade : str
     descricao_atividade : str
     localidade_atividade : str
+    participantes : list[ParticipanteModel]
 
     # CONSTRUTOR
 

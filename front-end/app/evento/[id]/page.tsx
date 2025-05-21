@@ -1,8 +1,6 @@
 'use client';
 import Loading from '@/app/components/loading';
 import Navbar from '@/app/components/Navbar';
-import Sidebar from '@/app/components/Sidebar';
-import { get } from 'http';
 import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
@@ -48,26 +46,23 @@ export default function EventoDetalhes() {
         }
     };
     return (
-        <main className="grid grid-cols-[auto_1fr] min-h-[100dvh]">
-            <Sidebar selected={0} />
-            <div className="grid grid-rows-[auto_1fr]">
-                <Navbar />
-                <section className="flex items-center justify-center">
-                    {loading ? (
-                        <Loading />
-                    ) : (
-                        <article className="flex flex-col gap-4 p-4 items-start justify-center w-full">
-                            <h1 className="text-4xl font-bold">
-                                {evento['nome_evento']}
-                            </h1>
-                            <div className="w-2/3 h-[2px] bg-gray-200"></div>
-                            <h2 className="text-xl opacity-70">
-                                {evento['data_evento']}
-                            </h2>
-                        </article>
-                    )}
-                </section>
-            </div>
+        <main className="grid grid-rows-[auto_1fr] min-h-[100dvh]">
+            <Navbar />
+            <section className="flex items-center justify-center">
+                {loading ? (
+                    <Loading />
+                ) : (
+                    <article className="flex flex-col gap-4 p-4 items-start justify-center w-full">
+                        <h1 className="text-4xl font-bold">
+                            {evento['nome_evento']}
+                        </h1>
+                        <div className="w-2/3 h-[2px] bg-gray-200"></div>
+                        <h2 className="text-xl opacity-70">
+                            {evento['data_evento']}
+                        </h2>
+                    </article>
+                )}
+            </section>
         </main>
     );
 }

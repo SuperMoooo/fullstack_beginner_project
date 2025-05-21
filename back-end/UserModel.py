@@ -1,60 +1,49 @@
 import re
+from TipoUserModel import TipoUserModel
 
-class UserModel:
+
+class UserModel(TipoUserModel):
     # VARS
-    nome : str
-    email : str
-    password : str
+
+    nif : int
+    codigo : str
 
     # CONSTRUTOR
-    def __init__(self, nome, email, password):
-        if nome == '':
-            raise Exception('O nome não pode ser vazio')
-        self.nome = nome
-        if not self.verificar_email(email):
-            raise Exception('Email invalido!')
-        self.email = email
-        if not self.verificar_password(password):
-            raise Exception('A password deve ter mais de 6 caracteres!')
-        self.password = password
+
+    def __init__(self, nome, email, data_nascimento, password, tipo, nif, codigo ):
+
+        super().__init__(nome, email, data_nascimento, password, tipo)
+
+        if not UserModel.validar_nif(nif):
+            raise Exception("Nif num formato invalido")
+        self.nif = nif
+        self.codigo = codigo
 
     # ENCAPSULAMENTO
 
     # GETS
-    def get_nome(self):
-        return self.nome
 
-    def get_email(self):
-        return self.email
+    def get_nif(self):
+        return self.nif
 
-    def get_password(self):
-        return self.password
+    def get_codigo(self):
+        return self.codigo
 
     # SETS
 
-    def set_nome(self, nome):
-        if nome == '':
-            raise Exception('O nome não pode ser vazio')
-        self.nome = nome
+    def set_nif(self, nif):
+        if not UserModel.validar_nif(nif):
+            raise Exception("Nif num formato invalido")
+        self.nif = nif
 
-    def set_email(self, email):
-        if not self.verificar_email(email):
-            raise Exception('Email invalido')
-        self.email = email
-
-    def set_password(self, password):
-        if not self.verificar_password(password):
-            raise Exception('A password deve ter mais de 6 caracteres!')
-        self.password = password
+    def set_codigo(self, codigo):
+        self.codigo = codigo
 
     # FIM ENCAPSULAMENTO
 
-    # FUNÇÕES
+    # FUNCS
 
     @staticmethod
-    def verificar_email(email):
-        return re.fullmatch(r"^\S+@\S+\.\S+$", email)
-
-    @staticmethod
-    def verificar_password(password):
-        return len(password) > 6
+    def validar_nif(nif : int):
+        # VALIDAR NIF SE 9 digitos
+        return re.fullmatch(r"\d{9}$", str(nif))

@@ -12,13 +12,13 @@ export default function TitleInput({
     inputType?: string;
 }) {
     return (
-        <div className="flex items-start flex-col justify-center gap-2">
+        <div className="flex items-start flex-col justify-center gap-2 w-full">
             <h1 className="text-lg">{titulo}</h1>
             <input
                 value={valor}
                 onChange={(e) => setValor(e.target.value)}
                 type={inputType ? inputType : 'text'}
-                className="rounded-md border-2 bg-gray-100 p-2 outline-none"
+                className="rounded-md border border-gray-300 bg-gray-100 p-2 outline-none w-full"
             />
         </div>
     );

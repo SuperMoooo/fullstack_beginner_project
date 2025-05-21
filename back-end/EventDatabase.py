@@ -1,36 +1,27 @@
-from pymongo import MongoClient
-from EventModel import EventModel
+
 
 class EventDatabase:
 
     @staticmethod
-    def get_eventos():
+    def get_eventos(collection):
         try:
-            client = MongoClient("mongodb://localhost:27017/")
-            mydb = client["2_freq"]
-            collection = mydb["events"]
             data = collection.find({})
             return data
         except Exception as e:
             print(e)
             raise
     @staticmethod
-    def criar_evento(evento : EventModel):
+    def criar_evento(evento, collection):
         try:
-            client = MongoClient("mongodb://localhost:27017/")
-            mydb = client["2_freq"]
-            collection = mydb["events"]
             collection.insert_one(evento.__dict__)
+            return True
         except Exception as e:
             print(e)
             raise
 
     @staticmethod
-    def get_evento(id):
+    def get_evento(id, collection):
         try:
-            client = MongoClient("mongodb://localhost:27017/")
-            mydb = client["2_freq"]
-            collection = mydb["events"]
             data = collection.find({"id" : id})
             return data
         except Exception as e:
@@ -39,11 +30,8 @@ class EventDatabase:
 
 
     @staticmethod
-    def get_event_last_id():
+    def get_event_last_id(collection):
         try:
-            client = MongoClient("mongodb://localhost:27017/")
-            mydb = client["2_freq"]
-            collection = mydb["events"]
             data = collection.find({})
             if data is None:
                 return 0

@@ -1,48 +1,25 @@
-import re
+from TipoUserModel import TipoUserModel
+from pymongo import MongoClient
 
+class ParticipanteModel(TipoUserModel):
+    #VARS
 
-class ParticipanteModel:
-    # VARS
-    nif : int
-    codigo : str
+    eventos_id : list[int]
 
     # CONSTRUTOR
+    def __init__(self, nome, email, data_nascimento, password, eventos_id, tipo):
+        super().__init__(nome, email, data_nascimento, password, tipo)
 
-    def __init__(self, nif, codigo):
-        if not ParticipanteModel.validar_nif(nif):
-            raise Exception("Nif num formato invalido")
-        self.nif = nif
-        if codigo == '':
-            raise Exception("O código não pode ser vazio")
-        self.codigo = codigo
+        self.eventos_id = eventos_id
 
     # ENCAPSULAMENTO
 
     # GETS
 
-    def get_nif(self):
-        return self.nif
-
-    def get_codigo(self):
-        return self.codigo
+    def get_eventos_id(self):
+        return self.eventos_id
 
     # SETS
 
-    def set_nif(self, nif):
-        if not ParticipanteModel.validar_nif(nif):
-            raise Exception("Nif num formato invalido")
-        self.nif = nif
-
-    def set_codigo(self, codigo):
-        if codigo == '':
-            raise Exception("O código não pode ser vazio")
-        self.codigo = codigo
-
-    # FIM ENCAPSULAMENTO
-
-    # FUNCS
-
-    @staticmethod
-    def validar_nif(nif : int):
-        # VALIDAR NIF SE 9 digitos
-        return re.fullmatch(r"\d{9}$", str(nif))
+    def set_eventos_id(self, eventos_id):
+        self.eventos_id = eventos_id
