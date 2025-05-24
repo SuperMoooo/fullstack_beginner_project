@@ -15,9 +15,8 @@ class EventModel:
     comentarios : list[str]
 
     # CONSTRUTOR
-    def __init__(self, nome_evento, data_evento, lista_atividades, lista_utilizadores, comentarios):
-        id = EventModel.get_id()
-        self.id = id
+    def __init__(self, nome_evento : str, data_evento :  datetime, lista_atividades : list[AtividadesModel], lista_utilizadores : list[UserModel], comentarios : list[str]):
+        self.id = EventModel.get_id()
         if nome_evento == '':
             raise Exception('O nome do evento não pode ser vazio')
         self.nome_evento = nome_evento
@@ -52,25 +51,25 @@ class EventModel:
 
     # SETS
 
-    def set_nome_evento(self, nome_evento):
+    def set_nome_evento(self, nome_evento : str):
         if nome_evento == '':
             raise Exception('O nome do evento não pode ser vazio')
         self.nome_evento = nome_evento
 
-    def set_data_evento(self, data_evento):
+    def set_data_evento(self, data_evento : datetime):
         if not EventModel.validar_data(data_evento):
             raise Exception("A data do evento está num formato inválido")
         self.data_evento = data_evento
 
-    def set_lista_atividades(self, lista_atividades):
+    def set_lista_atividades(self, lista_atividades : list[AtividadesModel]):
         if not lista_atividades :
             raise Exception("Lista de Atividades vazia")
         self.lista_atividades = lista_atividades
 
-    def set_lista_utilizadores(self, lista_utilizadores):
+    def set_lista_utilizadores(self, lista_utilizadores : list[UserModel]):
         self.lista_utilizadores = lista_utilizadores
 
-    def set_comentarios(self, comentarios):
+    def set_comentarios(self, comentarios : list[str]):
         self.comentarios = comentarios
 
     # FIM ENCAPSULAMENTO

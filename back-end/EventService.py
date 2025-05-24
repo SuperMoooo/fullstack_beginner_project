@@ -7,6 +7,8 @@ from pymongo import MongoClient
 from UserModel import UserModel
 from ParticipanteModel import ParticipanteModel
 from EventModel import EventModel
+from AtividadesModel import AtividadesModel
+
 
 # APP
 app = Flask(__name__)
@@ -26,13 +28,15 @@ collEvents = db["events"]
 # VERIFICAR SE TEM TOKEN
 @app.before_request
 def verify_auth():
+    if request.method == 'OPTIONS':
+        return None
     # SE O REQUEST FOR ALGO RELACIONADO Á AUTH ENTÂO IGNORA, SENÃO, VERIFICA SEM TEM TOKEN DE AUTH
-    if request.path != "/login" and request.path != "/register" and request.path != "/alterar-password":
-        auth = request.authorization
-        if auth.token != "Bearer 83e395725af4e8ccf208f91b8d84ac2257d8c772":
+    if request.path not in ["/login", "/register", "/alterar-password"]:
+        auth = request.headers.get("Authorization")
+        if auth != "Bearer 83e395725af4e8ccf208f91b8d84ac2257d8c772":
             return jsonify({"Erro": "Não Autenticado"}), 401
-    else:
-        pass
+        return None
+    return None
 
 # ::::::::::::: AUTH ::::::::::::::::
 
@@ -113,8 +117,11 @@ def alterar_password():
 def get_eventos():
     try:
         data = EventDatabase.get_eventos(collEvents)
+        if data is None:
+            return jsonify({"Erro", "Sem eventos!"}), 404
         return jsonify({"Data": data})
     except Exception as e:
+        print(e)
         return jsonify({"Erro" : str(e)}), 400
 
 # RETORNA EVENTO PELO ID
@@ -135,19 +142,32 @@ def criar_evento():
         data = request.get_json()
         if data is None:
             return jsonify({"Erro" : "Dados inválidos"}), 400
-        auxUser = UserDatabase.get_user_by_nome(data["nome"], collUsers)
         # VERIFICAR PERMISSÕES
-        if auxUser.get_tipo() != "admin":
+        if data["user_tipo"] != "admin":
             return jsonify({"Erro" : "Não tem permissão para criar eventos"}), 401
 
-        evento = EventModel(data["nome_evento"], data["data_evento"], data["lista_atividades"], data["lista_participantes"], [],[])
+        evento = EventModel(data["nome_evento"], data["data_evento"], data["lista_atividades"], [], [])
         sucess = EventDatabase.criar_evento(evento, collEvents)
         if sucess:
-            return jsonify({"Sucesso": "Evento Criado"}), 200
+            return jsonify({"Sucesso": "Evento criado"}), 200
         else:
             return jsonify({"Erro" : "Erro ao criar evento"}), 400
     except Exception as e:
         return jsonify({"Erro" : str(e)}), 400
+
+# VALIDAR INSERIR ATIVIDADE
+@app.route("/validar-atividade", methods=['POST'])
+def validar_atividade():
+    try:
+        data = request.get_json()
+        if data is None:
+            return jsonify({"Erro" : "Dados inválidos"}), 400
+        AtividadesModel(data["data_atividade"], data["hora_atividade"], data["descricao_atividade"], data["localidade_atividade"], [])
+        return jsonify({"Sucesso": "Atividade validada com sucesso"}), 200
+    except Exception as e:
+        return jsonify({"Erro" : str(e)}), 400
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

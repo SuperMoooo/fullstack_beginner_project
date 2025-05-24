@@ -1,7 +1,7 @@
 export type Tipo = 'admin' | 'user' | 'participante';
 
 export type Atividade = {
-    data_atividade: Date;
+    data_atividade: string;
     hora_atividade: string;
     descricao_atividade: string;
     localidade_atividade: string;
@@ -18,7 +18,7 @@ export type Participante = {
 export type User = {
     nome_utilizador: string;
     email_utilizador: string;
-    data_nascimento_utilizador: Date;
+    data_nascimento_utilizador: string;
     password_utilizador: string;
     tipo_utilizador: Tipo;
     nif_utilizador: string;
@@ -26,8 +26,9 @@ export type User = {
 };
 
 export type Evento = {
+    id: number;
     nome_evento: string;
-    data_evento: Date;
+    data_evento: string;
     lista_atividades: Atividade[];
     lista_utilizadores: User[] | undefined;
     comentarios: string[] | undefined;

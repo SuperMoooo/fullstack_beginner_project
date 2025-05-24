@@ -9,7 +9,7 @@ class TipoUserModel:
     password : str
     tipo : str
 
-    def __init__(self, nome, email, data_nascimento, password, tipo):
+    def __init__(self, nome : str, email : str, data_nascimento : datetime, password : str, tipo : str):
         if nome == '':
             raise Exception('O nome não pode ser vazio')
         self.nome = nome
@@ -51,27 +51,27 @@ class TipoUserModel:
 
     # SETS
 
-    def set_nome(self, nome):
+    def set_nome(self, nome : str):
         if nome == '':
             raise Exception('O nome não pode ser vazio')
         self.nome = nome
 
-    def set_email(self, email):
+    def set_email(self, email : str):
         if not self.verificar_email(email):
             raise Exception('Email invalido')
         self.email = email
 
-    def set_data_nascimento(self, data_nascimento):
+    def set_data_nascimento(self, data_nascimento : datetime):
         if not self.verificar_data(data_nascimento):
             raise Exception('Data nascimento invalida!')
         self.data_nascimento = data_nascimento
 
-    def set_password(self, password):
+    def set_password(self, password : str):
         if not self.verificar_password(password):
             raise Exception('A password deve ter mais de 6 caracteres!')
         self.password = password
 
-    def set_tipo(self, tipo):
+    def set_tipo(self, tipo : str):
         if not self.verificar_tipo(tipo):
             raise Exception('Tipo invalido!')
         self.tipo = tipo
@@ -81,20 +81,20 @@ class TipoUserModel:
     # FUNÇÕES
 
     @staticmethod
-    def verificar_email(email):
+    def verificar_email(email : str):
         return re.fullmatch(r"^\S+@\S+\.\S+$", email)
 
     @staticmethod
-    def verificar_password(password):
+    def verificar_password(password : str):
         # PASSWORD TEM DE SER MAIS DE 6 CHARS
         return len(password) > 6
 
     @staticmethod
-    def verificar_data(data):
+    def verificar_data(data : datetime):
         # VERIFICAR FORMATO DA DATA (dd/mm/yyyy)
         return re.fullmatch(r"\d{2}/\d{2}/\d{4}$", str(data))
 
     @staticmethod
-    def verificar_tipo(tipo):
+    def verificar_tipo(tipo : str):
         # VERIFICAR FORMATO DA DATA (dd/mm/yyyy)
         return re.fullmatch(r"admin|user|participante", tipo.lower())

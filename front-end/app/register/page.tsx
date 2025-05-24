@@ -13,18 +13,21 @@ export default function RegisterPage() {
     const [tipo, setTipo] = useState<Tipo>('admin');
     const [nif, setNif] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string>('');
 
     // HANDLE REGISTER
     const register = async (e: any) => {
         try {
+            e.preventDefault();
             let day = data_nascimento.split('-')[2];
             let month = data_nascimento.split('-')[1].split('-')[0];
             let year = data_nascimento.split('-')[0];
             const birthDate = `${day}/${month}/${year}`;
-            e.preventDefault();
+
             setLoading(true);
-            if (nome == '' || password == '') {
-                alert('Preencha todos os campos');
+            if (nome == '' || password == '' || email == '') {
+                alert('Preencha todos os campos!');
+                setError('Preencha todos os campos!');
                 return;
             }
             let response;
@@ -65,75 +68,101 @@ export default function RegisterPage() {
                 window.location.href = '/login';
             } else {
                 const errorData = await response.json();
+                setError(errorData['Erro'] || 'Erro desconhecido');
                 alert(errorData['Erro'] || 'Erro desconhecido');
             }
-        } catch (error) {
+        } catch (error: any) {
+            setError(error.message);
             alert('Erro ao fazer login');
         } finally {
             setLoading(false);
         }
     };
     return (
-        <main className="flex items-center justify-center h-[100dvh]">
-            <form
-                className="border rounded-2xl shadow-2xl flex items-center justify-center gap-6 flex-col p-10 w-1/3"
-                onSubmit={register}
-            >
-                <h1 className="text-3xl">Criar conta</h1>
-                <div className="w-full flex items-start justify-between flex-col gap-2">
-                    <h1 className="text-lg">Tipo de Utilizador</h1>
-                    <select
-                        name="tipo"
-                        id="tipo"
-                        onChange={(e) => setTipo(e.target.value as Tipo)}
-                        className="rounded-md border border-gray-300 bg-gray-100 p-2 outline-none w-full"
-                    >
-                        <option value="admin">Admin</option>
-                        <option value="user">Usuário</option>
-                        <option value="participante">Participante</option>
-                    </select>
-                </div>
-
-                <TitleInput setValor={setNome} valor={nome} titulo="Nome" />
-                <TitleInput
-                    setValor={setEmail}
-                    valor={email}
-                    titulo="Email"
-                    inputType="email"
-                />
-                <TitleInput
-                    setValor={setDataNascimento}
-                    valor={data_nascimento}
-                    titulo="Data de nascimento"
-                    inputType="date"
-                />
-                <TitleInput
-                    setValor={setPassword}
-                    valor={password}
-                    titulo="Password"
-                    inputType="password"
-                />
-                {tipo == 'user' && (
-                    <TitleInput setValor={setNif} valor={nif} titulo="Nif" />
-                )}
-
-                <button
-                    className="border rounded-2xl text-white bg-blue-500 p-4 w-full cursor-pointer hover:bg-blue-400"
-                    type="submit"
+        <main className="grid grid-rows-[auto_1fr] h-[100dvh]">
+            <header className="flex justify-start items-center p-6 border-b border-gray-300">
+                <Link href={{ pathname: '/login' }} className="text-4xl">
+                    &#60; Voltar
+                </Link>
+            </header>
+            <section className="flex items-center justify-center ">
+                <form
+                    className="border rounded-2xl shadow-2xl flex items-center justify-center gap-6 flex-col p-10 w-1/3"
+                    onSubmit={register}
                 >
-                    Entrar
-                </button>
-                <h3>
-                    Já tem conta?{' '}
-                    <Link
-                        href={{ pathname: '/login' }}
-                        className="underline text-blue-700"
+                    <h1 className="text-3xl">Criar conta</h1>
+                    <div className="w-full flex items-start justify-between flex-col gap-2">
+                        <h1 className="text-lg">Tipo de Utilizador</h1>
+                        <select
+                            name="tipo"
+                            id="tipo"
+                            onChange={(e) => setTipo(e.target.value as Tipo)}
+                            className="rounded-md border border-gray-300 bg-gray-100 p-2 outline-none w-full"
+                        >
+                            <option value="admin">Admin</option>
+                            <option value="user">Usuário</option>
+                            <option value="participante">Participante</option>
+                        </select>
+                    </div>
+
+                    <TitleInput
+                        setValor={setNome}
+                        valor={nome}
+                        titulo="Nome"
+                        error={error.toLocaleLowerCase().includes('nome')}
+                    />
+                    <TitleInput
+                        setValor={setEmail}
+                        valor={email}
+                        titulo="Email"
+                        inputType="text"
+                        error={error.toLocaleLowerCase().includes('email')}
+                    />
+                    <TitleInput
+                        setValor={setDataNascimento}
+                        valor={data_nascimento}
+                        titulo="Data de nascimento"
+                        inputType="date"
+                        error={error.toLocaleLowerCase().includes('data')}
+                    />
+                    <TitleInput
+                        setValor={setPassword}
+                        valor={password}
+                        titulo="Password"
+                        inputType="password"
+                        error={error.toLocaleLowerCase().includes('password')}
+                    />
+
+                    {tipo == 'user' && (
+                        <TitleInput
+                            setValor={setNif}
+                            valor={nif}
+                            titulo="Nif"
+                            error={error.toLocaleLowerCase().includes('nif')}
+                        />
+                    )}
+
+                    <button
+                        className="border rounded-2xl text-white bg-blue-500 p-4 w-full cursor-pointer hover:bg-blue-400"
+                        type="submit"
                     >
-                        Entrar!
-                    </Link>
-                </h3>
-            </form>
-            {loading && <Loading />}
+                        Entrar
+                    </button>
+                    {error && !error.includes('undefined') && (
+                        <p className="text-red-500">{error}</p>
+                    )}
+                    <h3>
+                        Já tem conta?{' '}
+                        <Link
+                            href={{ pathname: '/login' }}
+                            className="underline text-blue-700"
+                        >
+                            Entrar!
+                        </Link>
+                    </h3>
+                </form>
+                {loading && <Loading />}
+            </section>
         </main>
     );
 }

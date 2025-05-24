@@ -1,6 +1,6 @@
 import re
 from TipoUserModel import TipoUserModel
-
+from datetime import datetime
 
 class UserModel(TipoUserModel):
     # VARS
@@ -10,7 +10,7 @@ class UserModel(TipoUserModel):
 
     # CONSTRUTOR
 
-    def __init__(self, nome, email, data_nascimento, password, tipo, nif, codigo ):
+    def __init__(self, nome : str, email : str, data_nascimento : datetime, password : str, tipo : str, nif : int, codigo : str):
 
         super().__init__(nome, email, data_nascimento, password, tipo)
 
@@ -31,12 +31,12 @@ class UserModel(TipoUserModel):
 
     # SETS
 
-    def set_nif(self, nif):
+    def set_nif(self, nif : int):
         if not UserModel.validar_nif(nif):
             raise Exception("Nif num formato invalido")
         self.nif = nif
 
-    def set_codigo(self, codigo):
+    def set_codigo(self, codigo : str):
         self.codigo = codigo
 
     # FIM ENCAPSULAMENTO

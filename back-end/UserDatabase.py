@@ -21,7 +21,7 @@ class UserDatabase:
     # FUNÇÕES
 
     # VERIFICAR LOGIN
-    def check_login(self, password) -> bool:
+    def check_login(self, password : str) -> bool:
         try:
             if self.get_user().get_password() == password:
                 return True
@@ -31,7 +31,7 @@ class UserDatabase:
             return False
 
 
-    # ADICIONAR USER (SE JÁ NÃO EXISTIR) Á DB
+    # ADICIONAR USER (SE NÃO EXISTIR) Á DB
 
     def criar_user(self, collection) -> bool:
         try:
@@ -59,7 +59,7 @@ class UserDatabase:
 
     # RETORNAR USER BY NOME
     @staticmethod
-    def get_user_by_nome(nome, collection) -> TipoUserModel | None:
+    def get_user_by_nome(nome : str, collection) -> TipoUserModel | None:
         result = collection.find({})
         for user in result:
             if nome == user["nome"]:
@@ -67,7 +67,7 @@ class UserDatabase:
         return None
 
     # ALTERAR PASSWORD
-    def alterar_password(self, password, collection) -> bool:
+    def alterar_password(self, password : str, collection) -> bool:
         try:
             collection.update_one({"nome": self.get_user().get_nome()}, {"$set": {"password": password}})
             return True

@@ -1,23 +1,28 @@
 'use client';
 import React, { useState } from 'react';
 import Loading from '../components/loading';
+import Link from 'next/link';
+import TitleInput from '../components/title_input';
 
 export default function ForgotPassword() {
-    const [nome, setNome] = useState('');
-    const [password, setPassword] = useState('');
-    const [repeatPassword, setRepeatPassword] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [nome, setNome] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [repeatPassword, setRepeatPassword] = useState<string>('');
+    const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string>('');
 
     const handleResetPassword = async (e: any) => {
         try {
             e.preventDefault();
             setLoading(true);
             if (nome == '' || password == '' || repeatPassword == '') {
-                alert('Preencha todos os campos');
+                alert('Preencha todos os campos!');
+                setError('Preencha todos os campos!');
                 return;
             }
             if (password != repeatPassword) {
                 alert('As senhas não coincidem');
+                setError('As passwords não coincidem');
                 return;
             }
             const response = await fetch(
@@ -39,46 +44,54 @@ export default function ForgotPassword() {
             } else {
                 const errorData = await response.json();
                 alert(errorData['Erro'] || 'Erro desconhecido');
+                setError(errorData['Erro'] || 'Erro desconhecido');
             }
-        } catch (error) {
+        } catch (error: any) {
+            setError(error.message);
             alert('Erro ao resetar password');
         } finally {
             setLoading(false);
         }
     };
     return (
-        <main className="flex items-center justify-center h-[100dvh]">
-            <form
-                className="border rounded-2xl shadow-2xl flex items-center justify-center gap-6 flex-col p-10"
-                onSubmit={handleResetPassword}
-            >
-                <h1 className="text-3xl">Trocar Password</h1>
-                <input
-                    className="border-b border-gray-300 w-full outline-none"
-                    type="text"
-                    placeholder="Nome"
-                    onChange={(e) => setNome(e.target.value)}
-                />
-                <input
-                    className="border-b border-gray-300 w-full  outline-none"
-                    type="text"
-                    placeholder="Nova Password"
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-                <input
-                    className="border-b border-gray-300 w-full  outline-none"
-                    type="text"
-                    placeholder="Repete a Password"
-                    onChange={(e) => setRepeatPassword(e.target.value)}
-                />
-                <button
-                    className="border rounded-2xl text-white bg-blue-500 p-4 w-full cursor-pointer"
-                    type="submit"
+        <main className="grid grid-rows-[auto_1fr] h-[100dvh]">
+            <header className="flex justify-start items-center px-20 py-10 border-b border-gray-300">
+                <Link href={{ pathname: '/login' }} className="text-4xl">
+                    &#60; Voltar
+                </Link>
+            </header>
+            <section className="flex items-center justify-center">
+                <form
+                    className="border rounded-2xl shadow-2xl flex items-center justify-center gap-6 flex-col p-10 w-1/3"
+                    onSubmit={handleResetPassword}
                 >
-                    Trocar Password
-                </button>
-            </form>
-            {loading && <Loading />}
+                    <h1 className="text-3xl">Trocar Password</h1>
+                    <TitleInput titulo="Nome" valor={nome} setValor={setNome} />
+                    error={error.toLocaleLowerCase().includes('nome')}
+                    <TitleInput
+                        titulo="Nova Password"
+                        valor={password}
+                        setValor={setPassword}
+                        error={error.toLocaleLowerCase().includes('passwords')}
+                    />
+                    <TitleInput
+                        titulo="Repete a Password"
+                        valor={repeatPassword}
+                        setValor={setRepeatPassword}
+                        error={error.toLocaleLowerCase().includes('passwords')}
+                    />
+                    <button
+                        className="border rounded-2xl text-white bg-blue-500 p-4 w-full cursor-pointer"
+                        type="submit"
+                    >
+                        Trocar Password
+                    </button>
+                    {error && !error.includes('undefined') && (
+                        <p className="text-red-500">{error}</p>
+                    )}
+                </form>
+                {loading && <Loading />}
+            </section>
         </main>
     );
 }

@@ -5,7 +5,12 @@ class EventDatabase:
     @staticmethod
     def get_eventos(collection):
         try:
-            data = collection.find({})
+            mongo_data = collection.find()
+            data = []
+            for row in mongo_data:
+                row.pop("_id", None)
+                data.append(row)
+            print(data)
             return data
         except Exception as e:
             print(e)
@@ -20,7 +25,7 @@ class EventDatabase:
             raise
 
     @staticmethod
-    def get_evento(id, collection):
+    def get_evento(id : int, collection):
         try:
             data = collection.find({"id" : id})
             return data
@@ -32,10 +37,10 @@ class EventDatabase:
     @staticmethod
     def get_event_last_id(collection):
         try:
-            data = collection.find({})
-            if data is None:
+            last_event = collection.find_one(sort=[("id", -1)])
+            if last_event is None:
                 return 0
-            return data[-1]["id"]
+            return last_event["id"]
         except Exception as e:
             print(e)
             raise

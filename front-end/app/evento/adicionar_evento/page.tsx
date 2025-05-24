@@ -12,8 +12,15 @@ export default function AdicionarEvento() {
     // ATIVIDADES
     const [atividades, setAtividades] = useState<Atividade[]>([]);
     const [add_atividade, setAddAtividade] = useState<boolean>(false);
-    const [nomeAtividade, setNomeAtividade] = useState<string>('');
+    const [descricaoAtividade, setDescricaoAtividade] = useState<string>('');
+    const [dataAtividade, setDataAtividade] = useState<string>('');
+    const [horaAtividade, setHoraAtividade] = useState<string>('');
+    const [localAtividade, setLocalAtividade] = useState<string>('');
+    // UTIL
+    const [error, setError] = useState<string>('');
+    const [errorAtividade, setErrorAtividade] = useState<string>('');
 
+    // CRIAR EVENTO
     const handleCreateEvento = async (e: any) => {
         try {
             e.preventDefault();
@@ -22,12 +29,86 @@ export default function AdicionarEvento() {
             let year = dataEvento.split('-')[0];
             const eventDate = `${day}/${month}/${year}`;
             setLoading(true);
-        } catch (error) {
-            alert('Erro ao criar evento');
+            const token = localStorage.getItem('token');
+            const tipo = localStorage.getItem('tipo');
+            const response = await fetch('http://127.0.0.1:5000/criar-evento', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    user_tipo: tipo,
+                    nome_evento: nomeEvento,
+                    data_evento: eventDate,
+                    lista_atividades: atividades,
+                }),
+            });
+            if (response.ok) {
+                alert('Evento criado com sucesso');
+                window.location.href = '/';
+            } else {
+                const errorData = await response.json();
+                setError(errorData['Erro'] || 'Erro desconhecido');
+            }
+        } catch (error: any) {
+            setError(error.message);
         } finally {
             setLoading(false);
         }
     };
+    // CRIAR E VALIDAR ATIVIDADE
+    const handleCreateAtividade = async (e: any) => {
+        try {
+            e.preventDefault();
+            let day = dataAtividade.split('-')[2];
+            let month = dataAtividade.split('-')[1].split('-')[0];
+            let year = dataAtividade.split('-')[0];
+            const atividadeDate = `${day}/${month}/${year}`;
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            const response = await fetch(
+                'http://127.0.0.1:5000/validar-atividade',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        data_atividade: atividadeDate,
+                        hora_atividade: horaAtividade,
+                        descricao_atividade: descricaoAtividade,
+                        localidade_atividade: localAtividade,
+                    }),
+                }
+            );
+            if (response.ok) {
+                setAtividades([
+                    ...atividades,
+                    {
+                        data_atividade: atividadeDate,
+                        hora_atividade: horaAtividade,
+                        descricao_atividade: descricaoAtividade,
+                        localidade_atividade: localAtividade,
+                    } as any,
+                ]);
+                setAddAtividade(false);
+                setDescricaoAtividade('');
+                setDataAtividade('');
+                setHoraAtividade('');
+                setLocalAtividade('');
+            } else {
+                const errorData = await response.json();
+                setErrorAtividade(errorData['Erro'] || 'Erro desconhecido');
+            }
+        } catch (error: any) {
+            setErrorAtividade(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <main className="grid grid-rows-[auto_1fr] min-h-[100dvh]">
             <Navbar />
@@ -40,17 +121,33 @@ export default function AdicionarEvento() {
                         titulo="Nome do Evento"
                         valor={nomeEvento}
                         setValor={setNomeEvento}
+                        error={error.includes('nome')}
                     />
                     <TitleInput
                         titulo="Data do Evento"
                         valor={dataEvento}
                         setValor={setDataEvento}
                         inputType="date"
+                        error={error.includes('data')}
                     />
                 </aside>
+                {atividades.length > 0 && (
+                    <h1 className="text-xl self-start">Atividades</h1>
+                )}
                 <aside className="flex items-center justify-start w-full gap-6">
-                    {atividades.map((atividade: any, index: number) => (
-                        <div key={index}></div>
+                    {atividades.map((atividade: Atividade, index: number) => (
+                        <div
+                            key={index}
+                            className="border border-gray-300 p-6 rounded-2xl"
+                        >
+                            <h1>{atividade.descricao_atividade}</h1>
+                            <div className="w-full h-[1px] bg-gray-300"></div>
+                            <h2>
+                                {atividade.data_atividade} |{' '}
+                                {atividade.hora_atividade} |{' '}
+                                {atividade.localidade_atividade}
+                            </h2>
+                        </div>
                     ))}
                     <button
                         type="button"
@@ -66,12 +163,18 @@ export default function AdicionarEvento() {
                 >
                     Criar Evento
                 </button>
+                {error && !error.includes('undefined') && (
+                    <p className="text-red-500">{error}</p>
+                )}
             </form>
             {add_atividade && (
                 <section className="top-0 left-0 fixed w-screen h-screen flex items-center justify-center ">
                     <div className="bg-black opacity-60 top-0 left-0 fixed h-screen w-screen -z-10"></div>
 
-                    <form className="flex items-end justify-center gap-6 flex-col w-1/3 p-10 bg-white rounded-2xl">
+                    <form
+                        onSubmit={handleCreateAtividade}
+                        className="flex items-end justify-center gap-6 flex-col w-1/3 p-10 bg-white rounded-2xl"
+                    >
                         <button
                             className="text-5xl cursor-pointer"
                             type="button"
@@ -83,9 +186,30 @@ export default function AdicionarEvento() {
                             <h1 className="text-4xl">Nova Atividade</h1>
                         </div>
                         <TitleInput
-                            titulo="Nome da Atividade"
-                            setValor={setNomeAtividade}
-                            valor={nomeAtividade}
+                            titulo="Descrição da Atividade"
+                            setValor={setDescricaoAtividade}
+                            valor={descricaoAtividade}
+                            error={errorAtividade.includes('descrição')}
+                        />
+                        <TitleInput
+                            titulo="Data da Atividade"
+                            setValor={setDataAtividade}
+                            valor={dataAtividade}
+                            inputType="date"
+                            error={errorAtividade.includes('data')}
+                        />
+                        <TitleInput
+                            titulo="Hora da Atividade"
+                            setValor={setHoraAtividade}
+                            valor={horaAtividade}
+                            inputType="time"
+                            error={errorAtividade.includes('hora')}
+                        />
+                        <TitleInput
+                            titulo="Local da Atividade"
+                            setValor={setLocalAtividade}
+                            valor={localAtividade}
+                            error={errorAtividade.includes('local')}
                         />
                         <button
                             type="submit"
@@ -93,6 +217,10 @@ export default function AdicionarEvento() {
                         >
                             Adicionar Atividade
                         </button>
+                        {errorAtividade &&
+                            !errorAtividade.includes('undefined') && (
+                                <p className="text-red-500">{errorAtividade}</p>
+                            )}
                     </form>
                 </section>
             )}

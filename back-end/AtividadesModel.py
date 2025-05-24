@@ -14,7 +14,7 @@ class AtividadesModel:
 
     # CONSTRUTOR
 
-    def __init__(self, data_atividade, hora_atividade, descricao_atividade, localidade_atividade):
+    def __init__(self, data_atividade : datetime, hora_atividade : str, descricao_atividade : str, localidade_atividade : str, participantes: list[ParticipanteModel]):
         if not AtividadesModel.validar_data(data_atividade):
             raise Exception("A data da atividade está num formato inválido")
         self.data_atividade = data_atividade
@@ -27,6 +27,8 @@ class AtividadesModel:
         if localidade_atividade == '':
             raise Exception("A localidade da atividade não pode ser vazia")
         self.localidade_atividade = localidade_atividade
+
+        self.participantes = participantes
 
     # ENCAPSULAMENTO
 
@@ -44,27 +46,33 @@ class AtividadesModel:
     def get_localidade_atividade(self):
         return self.localidade_atividade
 
+    def get_participantes(self):
+        return self.participantes
+
     # SETS
 
-    def set_data_atividade(self, data_atividade):
+    def set_data_atividade(self, data_atividade : datetime):
         if not AtividadesModel.validar_data(data_atividade):
             raise Exception("A data da atividade está num formato inválido")
         self.data_atividade = data_atividade
 
-    def set_hora_atividade(self, hora_atividade):
+    def set_hora_atividade(self, hora_atividade : str):
         if not AtividadesModel.validar_hora(hora_atividade):
             raise Exception("A hora da atividade está num formato inválido")
         self.hora_atividade = hora_atividade
 
-    def set_descricao_atividade(self, descricao_atividade):
+    def set_descricao_atividade(self, descricao_atividade : str):
         if descricao_atividade == '':
             raise Exception("A descrição da atividade não pode ser vazia")
         self.descricao_atividade = descricao_atividade
 
-    def set_localidade_atividade(self, localidade_atividade):
+    def set_localidade_atividade(self, localidade_atividade : str):
         if localidade_atividade == '':
             raise Exception("A localidade da atividade não pode ser vazia")
         self.localidade_atividade = localidade_atividade
+
+    def set_participantes(self, participantes : list[ParticipanteModel]):
+        self.participantes = participantes
 
     # FIM ENCAPSULAMENTO
 

@@ -3,12 +3,13 @@ import { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Loading from './components/loading';
 import Link from 'next/link';
-import { Tipo } from './util/types';
+import { Evento, Tipo } from './util/types';
 
 export default function Home() {
-    const [loading, setLoading] = useState(false);
-    const [eventos, setEventos] = useState([]);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [eventos, setEventos] = useState<Evento[]>([]);
     const [tipo, setTipo] = useState<Tipo>('user');
+    const [authenticated, setAuthenticated] = useState<boolean>(false);
 
     useEffect(() => {
         getEvento();
@@ -22,6 +23,7 @@ export default function Home() {
             const token = localStorage.getItem('token');
             const limite = localStorage.getItem('token_limite');
             if (token && limite && Date.now() < parseInt(limite, 10)) {
+                setAuthenticated(true);
                 const response = await fetch(`http://127.0.0.1:5000/eventos`, {
                     method: 'GET',
                     headers: {
@@ -31,14 +33,13 @@ export default function Home() {
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    setEventos(data);
-                } else {
+                    setEventos(data['Data']);
                 }
             } else {
-                alert('Sessão expirada');
+                setAuthenticated(false);
             }
         } catch (error) {
-            alert('Erro ao carregar evento');
+            console.error(error);
         } finally {
             setLoading(false);
         }
@@ -63,28 +64,38 @@ export default function Home() {
                         </Link>
                     </aside>
                 )}
-
-                <section className="flex items-center justify-center w-full">
+                {eventos.length > 0 && (
+                    <h1 className="text-2xl font-bold self-start">Eventos</h1>
+                )}
+                <section
+                    className={`flex items-center ${
+                        eventos.length > 0 ? 'justify-start' : 'justify-center'
+                    }  w-full`}
+                >
                     {loading ? (
                         <Loading />
+                    ) : !authenticated ? (
+                        <h1 className="text-2xl text-red-600">
+                            Não está autenticado
+                        </h1>
                     ) : eventos.length > 0 ? (
                         eventos.map((evento, index) => (
                             <article
-                                key={evento['nome_evento'] + index}
-                                className="flex flex-col items-start justify-center gap-4 p-4 border rounded-2xl shadow-2xl border-gray-200"
+                                key={evento.nome_evento + index}
+                                className="flex flex-col items-start justify-center gap-2 p-4 border rounded-2xl shadow-2xl border-gray-200"
                             >
                                 <h1 className="text-xl">
                                     {evento['nome_evento']}
                                 </h1>
                                 <div className="w-full h-[2px] bg-gray-200"></div>
                                 <h2 className="text-lg opacity-70">
-                                    {evento['data_evento']}
+                                    {evento.data_evento}
                                 </h2>
                                 <Link
                                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
                                     href={{
                                         pathname: '/evento/',
-                                        query: { id: evento['id'] },
+                                        query: { id: evento.id },
                                     }}
                                 >
                                     Ver Detalhes
