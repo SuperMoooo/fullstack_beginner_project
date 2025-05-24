@@ -10,7 +10,6 @@ class EventDatabase:
             for row in mongo_data:
                 row.pop("_id", None)
                 data.append(row)
-            print(data)
             return data
         except Exception as e:
             print(e)

@@ -72,8 +72,11 @@ export default function RegisterPage() {
                 alert(errorData['Erro'] || 'Erro desconhecido');
             }
         } catch (error: any) {
-            setError(error.message);
-            alert('Erro ao fazer login');
+            if (error.message.includes('NetworkError')) {
+                setError('Servidor Offline');
+            } else {
+                setError(error.message);
+            }
         } finally {
             setLoading(false);
         }

@@ -6,17 +6,20 @@ export default function TitleInput({
     setValor,
     inputType,
     error,
+    readOnly,
 }: {
     titulo: string;
     valor: string;
     setValor: (valor: string) => void;
     inputType?: string;
     error?: boolean;
+    readOnly?: boolean;
 }) {
     return (
         <div className="flex items-start flex-col justify-center gap-2 w-full">
             <h1 className="text-lg">{titulo}</h1>
             <input
+                readOnly={readOnly}
                 value={valor}
                 onChange={(e) => setValor(e.target.value)}
                 type={inputType ? inputType : 'text'}

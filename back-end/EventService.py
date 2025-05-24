@@ -110,6 +110,20 @@ def alterar_password():
 
 # ::::::::::::: FIM AUTH ::::::::::::::::
 
+# ::::::::::::: USER :::::::::::::::::::
+
+@app.route("/get-user/<string:nome>", methods=['GET'])
+def get_user(nome):
+    try:
+        userAux = UserDatabase.get_user_by_nome(nome, collUsers)
+        print(userAux)
+        if userAux is None:
+            return jsonify({"Erro", "Utilizador não encontrado!"}), 404
+        return jsonify({"Data": userAux.__dict__}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"Erro" : str(e)}), 400
+
 # ::::::::::::: EVENTO ::::::::::::::::
 
 # RETORNA TODOS OS EVENTOS

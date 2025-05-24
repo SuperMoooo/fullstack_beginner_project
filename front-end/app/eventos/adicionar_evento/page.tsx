@@ -111,7 +111,7 @@ export default function AdicionarEvento() {
 
     return (
         <main className="grid grid-rows-[auto_1fr] min-h-[100dvh]">
-            <Navbar />
+            <Navbar goBack={true} />
             <form
                 className="flex items-center justify-start gap-6 flex-col w-full p-20"
                 onSubmit={handleCreateEvento}

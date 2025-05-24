@@ -41,6 +41,7 @@ export default function LoginPage() {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('token_limite', limite.toString());
                 localStorage.setItem('tipo', data.tipo);
+                localStorage.setItem('user_nome', nome);
                 router.replace('/');
             } else {
                 const errorData = await response.json();
@@ -48,8 +49,11 @@ export default function LoginPage() {
                 setError(errorData['Erro'] || 'Erro desconhecido');
             }
         } catch (error: any) {
-            alert('Erro ao fazer login');
-            setError(error.message);
+            if (error.message.includes('NetworkError')) {
+                setError('Servidor Offline');
+            } else {
+                setError(error.message);
+            }
         } finally {
             setLoading(false);
         }

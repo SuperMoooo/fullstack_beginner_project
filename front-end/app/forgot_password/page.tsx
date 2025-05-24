@@ -47,8 +47,11 @@ export default function ForgotPassword() {
                 setError(errorData['Erro'] || 'Erro desconhecido');
             }
         } catch (error: any) {
-            setError(error.message);
-            alert('Erro ao resetar password');
+            if (error.message.includes('NetworkError')) {
+                setError('Servidor Offline');
+            } else {
+                setError(error.message);
+            }
         } finally {
             setLoading(false);
         }
