@@ -40,6 +40,7 @@ export default function ForgotPassword() {
             );
             if (response.ok) {
                 alert('Password alterada com sucesso');
+                setError('');
                 window.location.href = '/login';
             } else {
                 const errorData = await response.json();
@@ -58,8 +59,11 @@ export default function ForgotPassword() {
     };
     return (
         <main className="grid grid-rows-[auto_1fr] h-[100dvh]">
-            <header className="flex justify-start items-center px-20 py-10 border-b border-gray-300">
-                <Link href={{ pathname: '/login' }} className="text-4xl">
+            <header className="flex justify-start items-center py-4 px-20 border-b border-gray-300">
+                <Link
+                    href={{ pathname: '/login' }}
+                    className="text-2xl cursor-pointer"
+                >
                     &#60; Voltar
                 </Link>
             </header>
@@ -69,19 +73,26 @@ export default function ForgotPassword() {
                     onSubmit={handleResetPassword}
                 >
                     <h1 className="text-3xl">Trocar Password</h1>
-                    <TitleInput titulo="Nome" valor={nome} setValor={setNome} />
-                    error={error.toLocaleLowerCase().includes('nome')}
+                    <TitleInput
+                        titulo="Nome"
+                        valor={nome}
+                        setValor={setNome}
+                        error={error.toLocaleLowerCase().includes('nome')}
+                    />
+
                     <TitleInput
                         titulo="Nova Password"
                         valor={password}
                         setValor={setPassword}
                         error={error.toLocaleLowerCase().includes('passwords')}
+                        inputType="password"
                     />
                     <TitleInput
                         titulo="Repete a Password"
                         valor={repeatPassword}
                         setValor={setRepeatPassword}
                         error={error.toLocaleLowerCase().includes('passwords')}
+                        inputType="password"
                     />
                     <button
                         className="border rounded-2xl text-white bg-blue-500 p-4 w-full cursor-pointer"

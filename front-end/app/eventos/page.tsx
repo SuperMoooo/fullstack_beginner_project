@@ -32,7 +32,7 @@ export default function Eventos() {
             });
             if (response.ok) {
                 const data = await response.json();
-                setEventos(data['Data']);
+                setEventos(data);
                 setError('');
             } else {
                 const errorData = await response.json();

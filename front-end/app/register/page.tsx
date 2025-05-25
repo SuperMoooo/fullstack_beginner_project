@@ -65,6 +65,7 @@ export default function RegisterPage() {
             // SALVAR TOKEN E LIMITE
             if (response.ok) {
                 alert('Sucesso');
+                setError('');
                 window.location.href = '/login';
             } else {
                 const errorData = await response.json();
@@ -83,8 +84,11 @@ export default function RegisterPage() {
     };
     return (
         <main className="grid grid-rows-[auto_1fr] h-[100dvh]">
-            <header className="flex justify-start items-center p-6 border-b border-gray-300">
-                <Link href={{ pathname: '/login' }} className="text-4xl">
+            <header className="flex justify-start items-center py-4 px-20 border-b border-gray-300">
+                <Link
+                    href={{ pathname: '/login' }}
+                    className="text-2xl cursor-pointer"
+                >
                     &#60; Voltar
                 </Link>
             </header>

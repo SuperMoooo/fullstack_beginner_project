@@ -42,6 +42,7 @@ export default function LoginPage() {
                 localStorage.setItem('token_limite', limite.toString());
                 localStorage.setItem('tipo', data.tipo);
                 localStorage.setItem('user_nome', nome);
+                setError('');
                 router.replace('/');
             } else {
                 const errorData = await response.json();
@@ -60,8 +61,11 @@ export default function LoginPage() {
     };
     return (
         <main className="grid grid-rows-[auto_1fr] h-[100dvh]">
-            <header className="flex justify-start items-center px-20 py-10 border-b border-gray-300">
-                <Link href={{ pathname: '/' }} className="text-4xl">
+            <header className="flex justify-start items-center py-4 px-20 border-b border-gray-300">
+                <Link
+                    href={{ pathname: '/' }}
+                    className="text-2xl cursor-pointer"
+                >
                     &#60; Voltar
                 </Link>
             </header>

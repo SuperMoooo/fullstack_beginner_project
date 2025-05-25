@@ -72,7 +72,7 @@ def register():
         elif data["tipo"] == "user":
             user = UserModel(data["nome"], data["email"], data["data_nascimento"], data["password"], data["tipo"], data["nif"], "")
         elif data["tipo"] == "participante":
-            user = ParticipanteModel(data["nome"], data["email"], data["data_nascimento"], data["password"], data["tipo"], [])
+            user = ParticipanteModel(data["nome"], data["email"], data["data_nascimento"], data["password"],[], data["tipo"] )
 
         userDB = UserDatabase(user)
         success = userDB.criar_user(collUsers)
@@ -116,10 +116,53 @@ def alterar_password():
 def get_user(nome):
     try:
         userAux = UserDatabase.get_user_by_nome(nome, collUsers)
-        print(userAux)
         if userAux is None:
             return jsonify({"Erro", "Utilizador não encontrado!"}), 404
-        return jsonify({"Data": userAux.__dict__}), 200
+        return jsonify(userAux.__dict__), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"Erro" : str(e)}), 400
+
+@app.route("/atualizar-user/<string:nome>", methods=['PUT'])
+def atualizar_user(nome):
+    try:
+        data = request.get_json()
+
+        userAux = UserDatabase.get_user_by_nome(nome, collUsers)
+
+        if userAux is None:
+            return jsonify({"Erro", "Utilizador não encontrado!"}), 404
+
+        userDB = UserDatabase(userAux)
+
+        # VERIFICAR O TIPO
+        updatedUserData = None
+        if data["tipo"] == "admin":
+            updatedUserData = AdminModel(data["nome"], data["email"], data["data_nascimento"], data["password"], data["tipo"])
+        elif data["tipo"] == "user":
+            updatedUserData = UserModel(data["nome"], data["email"], data["data_nascimento"], data["password"], data["tipo"], data["nif"], "")
+        elif data["tipo"] == "participante":
+            updatedUserData = ParticipanteModel(data["nome"], data["email"], data["data_nascimento"], data["password"], [], data["tipo"])
+
+        userDB.atualizar_user(updatedUserData, collUsers)
+        return jsonify({"Sucesso": "User atualizado com sucesso"}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"Erro" : str(e)}), 400
+
+@app.route("/apagar-user/<string:nome>", methods=['DELETE'])
+def apagar_user(nome):
+    try:
+        data = request.get_json()
+        userAux = UserDatabase.get_user_by_nome(nome, collUsers)
+        if userAux is None:
+            return jsonify({"Erro", "Utilizador não encontrado!"}), 404
+        if userAux.get_password() == data["password"]:
+            userDB = UserDatabase(userAux)
+            userDB.apagar_user(collUsers)
+            return jsonify({"Sucesso", "A sua conta foi apagada"}), 200
+        else:
+            return jsonify({"Erro", "A password não está certa!"}), 400
     except Exception as e:
         print(e)
         return jsonify({"Erro" : str(e)}), 400
@@ -133,7 +176,7 @@ def get_eventos():
         data = EventDatabase.get_eventos(collEvents)
         if data is None:
             return jsonify({"Erro", "Sem eventos!"}), 404
-        return jsonify({"Data": data})
+        return jsonify(data)
     except Exception as e:
         print(e)
         return jsonify({"Erro" : str(e)}), 400

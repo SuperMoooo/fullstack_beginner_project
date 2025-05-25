@@ -1,11 +1,14 @@
-from pymongo import MongoClient
 from TipoUserModel import TipoUserModel
+from UserModel import UserModel
+from AdminModel import AdminModel
+from ParticipanteModel import ParticipanteModel
+
 class UserDatabase:
     # VARS
     user : TipoUserModel
 
     # CONSTRUTOR
-    def __init__(self, user: TipoUserModel):
+    def __init__(self, user):
         self.user = user
 
     # ENCAPSULAMENTO
@@ -14,6 +17,8 @@ class UserDatabase:
 
     def get_user(self):
         return self.user
+
+    # SETS
 
     def set_user(self, user: TipoUserModel):
         self.user = user
@@ -59,11 +64,16 @@ class UserDatabase:
 
     # RETORNAR USER BY NOME
     @staticmethod
-    def get_user_by_nome(nome : str, collection) -> TipoUserModel | None:
-        result = collection.find({})
-        for user in result:
-            if nome == user["nome"]:
-                return TipoUserModel(user["nome"], user["email"], user["data_nascimento"], user["password"], user["tipo"])
+    def get_user_by_nome(nome : str, collection):
+        user = collection.find({"nome": nome})
+        if user:
+            result = user[0]
+            if result["tipo"] == "admin":
+                return AdminModel(result["nome"], result["email"], result["data_nascimento"], result["password"], result["tipo"])
+            elif result["tipo"] == "user":
+                return UserModel(result["nome"], result["email"], result["data_nascimento"], result["password"], result["tipo"], result["nif"], "")
+            elif result["tipo"] == "participante":
+                return ParticipanteModel(result["nome"], result["email"], result["data_nascimento"], result["password"],[], result["tipo"] )
         return None
 
     # ALTERAR PASSWORD
@@ -73,7 +83,24 @@ class UserDatabase:
             return True
         except Exception as e:
             print(e)
-            return False
+            raise
+
+    # ATUALIZAR USER
+    def atualizar_user(self, updatedUserData, collection):
+        try:
+            collection.delete_one({"nome": self.get_user().get_nome()})
+            collection.insert_one(updatedUserData.__dict__)
+            return True
+        except Exception as e:
+            print(e)
+            raise
 
 
 
+    def apagar_user(self, collection):
+        try:
+            collection.delete_one({"nome": self.get_user().get_nome()})
+            return True
+        except Exception as e:
+            print(e)
+            raise
