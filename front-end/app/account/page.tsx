@@ -130,6 +130,10 @@ export default function Account() {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
                     },
+                    body: JSON.stringify({
+                        nome: deleteNome,
+                        password: deletePassword,
+                    }),
                 }
             );
             if (response.ok) {
@@ -138,17 +142,17 @@ export default function Account() {
                 localStorage.removeItem('limite');
                 localStorage.removeItem('user_nome');
                 localStorage.removeItem('tipo');
-                setError('');
+                setDeleteError('');
                 window.location.href = '/';
             } else {
                 const errorData = await response.json();
-                setError(errorData['Erro'] ?? 'Erro desconhecido');
+                setDeleteError(errorData['Erro'] ?? 'Erro desconhecido');
             }
         } catch (error: any) {
             if (error.message.includes('NetworkError')) {
-                setError('Servidor Offline');
+                setDeleteError('Servidor Offline');
             } else {
-                setError(error.message);
+                setDeleteError(error.message);
             }
         } finally {
             setLoading(false);

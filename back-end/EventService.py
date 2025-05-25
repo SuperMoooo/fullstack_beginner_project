@@ -117,7 +117,7 @@ def get_user(nome):
     try:
         userAux = UserDatabase.get_user_by_nome(nome, collUsers)
         if userAux is None:
-            return jsonify({"Erro", "Utilizador não encontrado!"}), 404
+            return jsonify({"Erro": "Utilizador não encontrado!"}), 404
         return jsonify(userAux.__dict__), 200
     except Exception as e:
         print(e)
@@ -131,7 +131,7 @@ def atualizar_user(nome):
         userAux = UserDatabase.get_user_by_nome(nome, collUsers)
 
         if userAux is None:
-            return jsonify({"Erro", "Utilizador não encontrado!"}), 404
+            return jsonify({"Erro": "Utilizador não encontrado!"}), 404
 
         userDB = UserDatabase(userAux)
 
@@ -156,13 +156,16 @@ def apagar_user(nome):
         data = request.get_json()
         userAux = UserDatabase.get_user_by_nome(nome, collUsers)
         if userAux is None:
-            return jsonify({"Erro", "Utilizador não encontrado!"}), 404
-        if userAux.get_password() == data["password"]:
-            userDB = UserDatabase(userAux)
-            userDB.apagar_user(collUsers)
-            return jsonify({"Sucesso", "A sua conta foi apagada"}), 200
+            return jsonify({"Erro": "Utilizador não encontrado!"}), 404
+        if userAux.get_nome() == data["nome"]:
+            if userAux.get_password() == data["password"]:
+                userDB = UserDatabase(userAux)
+                userDB.apagar_user(collUsers)
+                return jsonify({"Sucesso": "A sua conta foi apagada"}), 200
+            else:
+                return jsonify({"Erro": "A password não está certa!"}), 400
         else:
-            return jsonify({"Erro", "A password não está certa!"}), 400
+            return jsonify({"Erro": "O seu nome não está correto!"}), 400
     except Exception as e:
         print(e)
         return jsonify({"Erro" : str(e)}), 400

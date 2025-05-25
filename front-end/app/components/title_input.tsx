@@ -24,9 +24,9 @@ export default function TitleInput({
                 value={valor}
                 onChange={(e) => setValor(e.target.value)}
                 type={showPassword ? 'text' : inputType ? inputType : 'text'}
-                className={`rounded-md border  bg-gray-100 p-2 outline-none w-full pr-10 ${
-                    error ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`rounded-md border  bg-gray-100 p-2 outline-none w-full ${
+                    inputType == 'password' ? 'pr-10' : ''
+                }  ${error ? 'border-red-500' : 'border-gray-300'}`}
             />
 
             {inputType == 'password' && (

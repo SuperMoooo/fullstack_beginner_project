@@ -52,6 +52,8 @@ export default function LoginPage() {
         } catch (error: any) {
             if (error.message.includes('NetworkError')) {
                 setError('Servidor Offline');
+            } else if (error.message.includes('cursor')) {
+                setError('Utilizador não encontrado');
             } else {
                 setError(error.message);
             }
