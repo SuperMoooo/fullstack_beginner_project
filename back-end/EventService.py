@@ -191,7 +191,7 @@ def get_evento(id):
         data = EventDatabase.get_evento(id, collEvents)
         if data is None:
             return jsonify({"Erro" : "Evento não encontrado"}), 404
-        return jsonify({"Sucesso": data})
+        return jsonify(data)
     except Exception as e:
         return jsonify({"Erro" : str(e)}), 400
 
