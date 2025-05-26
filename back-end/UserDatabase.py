@@ -1,7 +1,7 @@
-from ..models.TipoUserModel import TipoUserModel
-from ..models.UserModel import UserModel
-from ..models.AdminModel import AdminModel
-from ..models.ParticipanteModel import ParticipanteModel
+from TipoUserModel import TipoUserModel
+from UserModel import UserModel
+from AdminModel import AdminModel
+from ParticipanteModel import ParticipanteModel
 
 class UserDatabase:
     # VARS

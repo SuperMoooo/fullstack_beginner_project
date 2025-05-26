@@ -25,7 +25,11 @@ class EventDatabase:
     @staticmethod
     def get_evento(id : int, collection):
         try:
-            data = collection.find({"id" : id})
+            cursorData = collection.find({"id" : id})
+            data = None
+            for row in cursorData:
+                row.pop("_id", None)
+                data = row
             return data
         except Exception as e:
             print(e)

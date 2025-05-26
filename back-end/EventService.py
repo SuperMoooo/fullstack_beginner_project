@@ -1,13 +1,13 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from database.UserDatabase import UserDatabase
-from models.AdminModel import AdminModel
-from database.EventDatabase import EventDatabase
+from UserDatabase import UserDatabase
+from AdminModel import AdminModel
+from EventDatabase import EventDatabase
 from pymongo import MongoClient
-from models.UserModel import UserModel
-from models.ParticipanteModel import ParticipanteModel
-from models.EventModel import EventModel
-from models.AtividadesModel import AtividadesModel
+from UserModel import UserModel
+from ParticipanteModel import ParticipanteModel
+from EventModel import EventModel
+from AtividadesModel import AtividadesModel
 
 
 # APP
@@ -193,6 +193,7 @@ def get_evento(id):
             return jsonify({"Erro" : "Evento não encontrado"}), 404
         return jsonify(data)
     except Exception as e:
+        print(e)
         return jsonify({"Erro" : str(e)}), 400
 
 

@@ -10,9 +10,7 @@ export default function EventCard({ evento }: { evento: Evento }) {
             <h2 className="text-md opacity-70">{evento.data_evento}</h2>
             <Link
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-5"
-                href={{
-                    pathname: `/eventos/${evento.id}`,
-                }}
+                href={`/eventos/${evento.id}`}
             >
                 Ver Detalhes
             </Link>

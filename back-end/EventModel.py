@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 from AtividadesModel import AtividadesModel
-from ..database.EventDatabase import EventDatabase
+from EventDatabase import EventDatabase
 from pymongo import MongoClient
 from UserModel import UserModel
 

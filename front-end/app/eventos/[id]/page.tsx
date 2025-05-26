@@ -1,14 +1,17 @@
 'use client';
 import Loading from '@/app/components/loading';
 import Navbar from '@/app/components/Navbar';
-import { useSearchParams } from 'next/navigation';
+import { Evento } from '@/app/util/types';
+import { useParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 export default function EventoDetalhes() {
-    const searchParams = useSearchParams();
-    const id = searchParams.get('id');
-    const [evento, setEvento] = useState<any>({});
+    const params = useParams();
+    const id = params.id;
+
+    const [evento, setEvento] = useState<Evento>();
     const [loading, setLoading] = useState<boolean>(false);
+    const [error, setError] = useState<string>('');
 
     useEffect(() => {
         getEvento();
@@ -32,33 +35,38 @@ export default function EventoDetalhes() {
                 );
                 if (response.ok) {
                     const data = await response.json();
+                    console.log(data);
                     setEvento(data);
+                    setError('');
                 } else {
-                    alert('Erro ao carregar evento');
+                    const errorData = await response.json();
+                    setError(errorData['Erro'] ?? 'Erro desconhecido');
                 }
-            } else {
-                alert('Sessão expirada');
             }
-        } catch (error) {
-            alert('Erro ao carregar evento');
+        } catch (error: any) {
+            if (error.message.includes('NetworkError')) {
+                setError('Servidor Offline');
+            } else {
+                setError(error.message);
+            }
         } finally {
             setLoading(false);
         }
     };
     return (
         <main className="grid grid-rows-[auto_1fr] min-h-[100dvh]">
-            <Navbar />
+            <Navbar goBack={true} />
             <section className="flex items-center justify-center">
                 {loading ? (
                     <Loading />
                 ) : (
                     <article className="flex flex-col gap-4 p-4 items-start justify-center w-full">
                         <h1 className="text-4xl font-bold">
-                            {evento['nome_evento']}
+                            {evento?.nome_evento}
                         </h1>
                         <div className="w-2/3 h-[2px] bg-gray-200"></div>
                         <h2 className="text-xl opacity-70">
-                            {evento['data_evento']}
+                            {evento?.data_evento}
                         </h2>
                     </article>
                 )}

@@ -46,8 +46,11 @@ export default function LoginPage() {
                 router.replace('/');
             } else {
                 const errorData = await response.json();
-                alert(errorData['Erro'] || 'Erro desconhecido');
-                setError(errorData['Erro'] || 'Erro desconhecido');
+                if (errorData['Erro'].includes('Cursor')) {
+                    setError('Utilizador não encontrado');
+                } else {
+                    setError(errorData['Erro'] || 'Erro desconhecido');
+                }
             }
         } catch (error: any) {
             if (error.message.includes('NetworkError')) {
