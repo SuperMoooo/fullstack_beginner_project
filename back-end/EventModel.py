@@ -3,7 +3,7 @@ from datetime import datetime
 from AtividadesModel import AtividadesModel
 from EventDatabase import EventDatabase
 from pymongo import MongoClient
-from UserModel import UserModel
+from EntrevenienteModel import UserModel
 
 class EventModel:
     id : int

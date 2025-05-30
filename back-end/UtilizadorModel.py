@@ -1,0 +1,196 @@
+from datetime import datetime
+import re
+from AdminModel import AdminModel
+from ParticipanteModel import ParticipanteModel
+from EntrevenienteModel import EntrevenienteModel
+
+class UtilizadorModel:
+    # VARS
+    nome : str
+    email : str
+    data_nascimento : datetime
+    sexo : str
+    nif : str
+    password : str
+    tipo : str
+
+    def __init__(self, nome : str, email : str, data_nascimento : datetime, sexo: str, nif : str, password : str, tipo : str):
+        if nome == '':
+            raise Exception('O nome não pode ser vazio')
+        self.nome = nome
+
+        if not self.verificar_email(email):
+            raise Exception('Email invalido!')
+        self.email = email
+
+        if not self.verificar_data(data_nascimento):
+            raise Exception('Data nascimento invalida!')
+        self.data_nascimento = data_nascimento
+
+        if not self.verificar_sexo(sexo):
+            raise Exception('Sexo invalido!')
+        self.sexo = sexo
+
+        if not self.verificar_nif(nif):
+            raise Exception('Nif invalido!')
+        self.nif = nif
+
+        if not self.verificar_password(password):
+            raise Exception('A password deve ter mais de 6 caracteres!')
+        self.password = password
+
+        if not self.verificar_tipo(tipo):
+            raise Exception('Tipo invalido!')
+        self.tipo = tipo
+
+
+    # ENCAPSULAMENTO
+
+    # GETS
+    def get_nome(self):
+        return self.nome
+
+    def get_email(self):
+        return self.email
+
+    def get_data_nascimento(self):
+        return self.data_nascimento
+
+    def get_password(self):
+        return self.password
+
+    def get_tipo(self):
+        return self.tipo
+
+    # SETS
+
+    def set_nome(self, nome : str):
+        if nome == '':
+            raise Exception('O nome não pode ser vazio')
+        self.nome = nome
+
+    def set_email(self, email : str):
+        if not self.verificar_email(email):
+            raise Exception('Email invalido')
+        self.email = email
+
+    def set_data_nascimento(self, data_nascimento : datetime):
+        if not self.verificar_data(data_nascimento):
+            raise Exception('Data nascimento invalida!')
+        self.data_nascimento = data_nascimento
+
+    def set_password(self, password : str):
+        if not self.verificar_password(password):
+            raise Exception('A password deve ter mais de 6 caracteres!')
+        self.password = password
+
+    def set_tipo(self, tipo : str):
+        if not self.verificar_tipo(tipo):
+            raise Exception('Tipo invalido!')
+        self.tipo = tipo
+
+    # FIM ENCAPSULAMENTO
+
+    # FUNÇÕES
+
+    # VERIFICAR LOGIN
+    def check_login(self, password : str) -> bool:
+        try:
+            if self.get_password() == password:
+                return True
+            return False
+        except Exception as e:
+            print(e)
+            return False
+
+    # ALTERAR PASSWORD
+    def alterar_password(self, password : str, collection) -> bool:
+        try:
+            collection.update_one({"nome": self.get_nome()}, {"$set": {"password": password}})
+            return True
+        except Exception as e:
+            print(e)
+            raise
+
+
+    # ATUALIZAR USER
+    def atualizar_user(self, updatedUserData, collection):
+        try:
+            collection.delete_one({"nome": self.get_nome()})
+            collection.insert_one(updatedUserData.__dict__)
+            return True
+        except Exception as e:
+            print(e)
+            raise
+
+
+    # APAGAR USER
+    def apagar_user(self, collection):
+        try:
+            collection.delete_one({"nome": self.get_nome()})
+            return True
+        except Exception as e:
+            print(e)
+            raise
+
+
+    # VERIFICAR SE NOME DE UTILIZADOR JÁ EXISTE
+    @staticmethod
+    def verificar_user_exists(collection, nome) -> bool:
+        data = UtilizadorModel.get_users(collection)
+        for user in data:
+            if nome == user["nome"]:
+                return True
+        return False
+
+    # RECEBER TODOS OS USERS DA DB
+    @staticmethod
+    def get_users(collection) :
+        result = collection.find({})
+        return result
+
+    # RETORNAR USER BY NOME
+    @staticmethod
+    def get_user_by_nome(nome : str, collection):
+        user = collection.find({"nome": nome})
+        if user:
+            result = user[0]
+            if result["tipo"] == "admin":
+                return AdminModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"])
+            elif result["tipo"] == "entreveniente":
+                return EntrevenienteModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"] , [])
+            elif result["tipo"] == "participante":
+                return ParticipanteModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"], "" )
+        return None
+
+
+    # VERIFICAÇÕES
+
+    @staticmethod
+    def verificar_email(email : str):
+        return re.fullmatch(r"^\S+@\S+\.\S+$", email)
+
+    @staticmethod
+    def verificar_password(password : str):
+        # PASSWORD TEM DE SER MAIS DE 6 CHARS
+        return len(password) > 6
+
+    @staticmethod
+    def verificar_data(data : datetime):
+        # VERIFICAR FORMATO DA DATA (dd/mm/yyyy)
+        return re.fullmatch(r"\d{2}/\d{2}/\d{4}$", str(data))
+
+    @staticmethod
+    def verificar_tipo(tipo : str):
+        # VERIFICAR FORMATO DA DATA (dd/mm/yyyy)
+        return re.fullmatch(r"admin|user|participante", tipo.lower())
+
+    @staticmethod
+    def verificar_sexo(sexo : str):
+        # VALIDAR NIF SE 9 digitos
+        return re.fullmatch(r"homem|mulher|outro|prefiro não dizer", sexo.lower())
+
+    @staticmethod
+    def verificar_nif(nif : str):
+        # VALIDAR NIF SE 9 digitos
+        return re.fullmatch(r"\d{9}$", nif)

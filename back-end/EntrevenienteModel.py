@@ -2,33 +2,28 @@ from UtilizadorModel import UtilizadorModel
 from datetime import datetime
 from UtilizadorInterface import UtilizadorInterface
 
-class ParticipanteModel(UtilizadorModel, UtilizadorInterface):
-    # VARS
+class EntrevenienteModel(UtilizadorModel, UtilizadorInterface):
+    #VARS
 
-    codigo : str
+    eventos_id : list[int]
 
     # CONSTRUTOR
-
-    def __init__(self, nome : str, email : str, data_nascimento : datetime, sexo : str, nif : str, password : str, tipo : str, codigo : str):
-
+    def __init__(self, nome : str, email : str, data_nascimento : datetime, sexo : str, nif : str, password : str, tipo : str, eventos_id : list[int]):
         super().__init__(nome, email, data_nascimento, sexo, nif, password, tipo)
 
-        self.codigo = codigo
+        self.eventos_id = eventos_id
 
     # ENCAPSULAMENTO
 
     # GETS
 
-    def get_codigo(self):
-        return self.codigo
+    def get_eventos_id(self):
+        return self.eventos_id
 
     # SETS
 
-
-    def set_codigo(self, codigo : str):
-        self.codigo = codigo
-
-    # FIM ENCAPSULAMENTO
+    def set_eventos_id(self, eventos_id : list[int]):
+        self.eventos_id = eventos_id
 
     # FUNCS
 
