@@ -9,8 +9,8 @@ export default function TitleInput({
     readOnly,
 }: {
     titulo: string;
-    valor: string;
-    setValor: (valor: string) => void;
+    valor: string | number;
+    setValor: any;
     inputType?: string;
     error?: boolean;
     readOnly?: boolean;

@@ -2,6 +2,7 @@
 import Loading from '@/app/components/loading';
 import Navbar from '@/app/components/Navbar';
 import TitleInput from '@/app/components/title_input';
+import TitleSelect from '@/app/components/title_select';
 import { Atividade } from '@/app/util/types';
 import React, { useEffect, useState } from 'react';
 
@@ -9,6 +10,9 @@ export default function AdicionarEvento() {
     const [loading, setLoading] = useState<boolean>(false);
     const [nomeEvento, setNomeEvento] = useState<string>('');
     const [dataEvento, setDataEvento] = useState<string>('');
+    const [capacidadeEvento, setCapacidadeEvento] = useState<number>(1);
+    const [error, setError] = useState<string>('');
+
     // ATIVIDADES
     const [atividades, setAtividades] = useState<Atividade[]>([]);
     const [add_atividade, setAddAtividade] = useState<boolean>(false);
@@ -16,9 +20,15 @@ export default function AdicionarEvento() {
     const [dataAtividade, setDataAtividade] = useState<string>('');
     const [horaAtividade, setHoraAtividade] = useState<string>('');
     const [localAtividade, setLocalAtividade] = useState<string>('');
-    // UTIL
-    const [error, setError] = useState<string>('');
+    const [restricoes, setRestricoes] = useState<string>('Sem restrições');
     const [errorAtividade, setErrorAtividade] = useState<string>('');
+
+    const restricoesPossiveis = [
+        'Sem restrições',
+        'Idade mínima de 18 anos',
+        'Idade mínima de 16 anos',
+        'Idade mínima de 12 anos',
+    ];
 
     // CRIAR EVENTO
     const handleCreateEvento = async (e: any) => {
@@ -41,6 +51,7 @@ export default function AdicionarEvento() {
                     user_tipo: tipo,
                     nome_evento: nomeEvento,
                     data_evento: eventDate,
+                    capacidade_evento: capacidadeEvento,
                     lista_atividades: atividades,
                 }),
             });
@@ -80,6 +91,7 @@ export default function AdicionarEvento() {
                         hora_atividade: horaAtividade,
                         descricao_atividade: descricaoAtividade,
                         localidade_atividade: localAtividade,
+                        restricoes: restricoes,
                     }),
                 }
             );
@@ -91,6 +103,7 @@ export default function AdicionarEvento() {
                         hora_atividade: horaAtividade,
                         descricao_atividade: descricaoAtividade,
                         localidade_atividade: localAtividade,
+                        restricoes: restricoes,
                     } as any,
                 ]);
                 setAddAtividade(false);
@@ -98,6 +111,7 @@ export default function AdicionarEvento() {
                 setDataAtividade('');
                 setHoraAtividade('');
                 setLocalAtividade('');
+                setRestricoes('Sem restrições');
             } else {
                 const errorData = await response.json();
                 setErrorAtividade(errorData['Erro'] || 'Erro desconhecido');
@@ -124,6 +138,13 @@ export default function AdicionarEvento() {
                         error={error.includes('nome')}
                     />
                     <TitleInput
+                        titulo="Capacidade do Evento"
+                        valor={capacidadeEvento}
+                        setValor={setCapacidadeEvento}
+                        inputType="number"
+                        error={error.includes('capacidade')}
+                    />
+                    <TitleInput
                         titulo="Data do Evento"
                         valor={dataEvento}
                         setValor={setDataEvento}
@@ -134,11 +155,11 @@ export default function AdicionarEvento() {
                 {atividades.length > 0 && (
                     <h1 className="text-xl self-start">Atividades</h1>
                 )}
-                <aside className="flex items-center justify-start w-full gap-6">
+                <aside className="flex items-center justify-start w-full gap-4">
                     {atividades.map((atividade: Atividade, index: number) => (
                         <div
                             key={index}
-                            className="border border-gray-300 p-6 rounded-2xl"
+                            className="border border-gray-300 p-6 rounded-2xl gap-2 flex flex-col"
                         >
                             <h1>{atividade.descricao_atividade}</h1>
                             <div className="w-full h-[1px] bg-gray-300"></div>
@@ -147,6 +168,8 @@ export default function AdicionarEvento() {
                                 {atividade.hora_atividade} |{' '}
                                 {atividade.localidade_atividade}
                             </h2>
+                            <div className="w-full h-[1px] bg-gray-300"></div>
+                            <h2>{atividade.restricoes}</h2>
                         </div>
                     ))}
                     <button
@@ -210,6 +233,11 @@ export default function AdicionarEvento() {
                             setValor={setLocalAtividade}
                             valor={localAtividade}
                             error={errorAtividade.includes('local')}
+                        />
+                        <TitleSelect
+                            title="Restrições"
+                            valores={restricoesPossiveis}
+                            setValor={setRestricoes}
                         />
                         <button
                             type="submit"

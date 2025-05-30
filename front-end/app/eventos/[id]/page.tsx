@@ -56,18 +56,31 @@ export default function EventoDetalhes() {
     return (
         <main className="grid grid-rows-[auto_1fr] min-h-[100dvh]">
             <Navbar goBack={true} />
-            <section className="flex items-center justify-center">
+            <section className="flex items-start justify-center p-20">
                 {loading ? (
                     <Loading />
                 ) : (
                     <article className="flex flex-col gap-4 p-4 items-start justify-center w-full">
-                        <h1 className="text-4xl font-bold">
-                            {evento?.nome_evento}
-                        </h1>
-                        <div className="w-2/3 h-[2px] bg-gray-200"></div>
+                        <div className="flex justify-between items-center w-full">
+                            <h1 className="text-4xl font-bold">
+                                {evento?.nome_evento}
+                            </h1>
+                            <div className="flex items-center justify-center gap-4">
+                                <button className="cursor-pointer transition duration-300 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-5">
+                                    Editar Evento
+                                </button>
+                                <button className="cursor-pointer transition duration-300 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-5">
+                                    Eliminar Evento
+                                </button>
+                            </div>
+                        </div>
+                        <div className="w-full h-[2px] bg-gray-200"></div>
                         <h2 className="text-xl opacity-70">
-                            {evento?.data_evento}
+                            {evento?.data_evento} |{' '}
+                            {evento?.lista_participantes?.length ?? 0}/
+                            {evento?.capacidade_evento}
                         </h2>
+                        <section></section>
                     </article>
                 )}
             </section>

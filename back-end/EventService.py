@@ -1,14 +1,18 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from UtilizadorModel import UtilizadorModel
-from AdminModel import AdminModel
-from EventDatabase import EventDatabase
 from pymongo import MongoClient
+
+from UtilizadorModel import UtilizadorModel
 from EntrevenienteModel import EntrevenienteModel
 from ParticipanteModel import ParticipanteModel
+from AdminModel import AdminModel
+
 from EventModel import EventModel
 from AtividadesModel import AtividadesModel
 
+# EXCLUIR
+from UtilizadorDatabase import UtilizadorDatabase
+from EventDatabase import EventDatabase
 
 # APP
 app = Flask(__name__)
@@ -47,11 +51,11 @@ def login():
         data = request.get_json()
         if data is None:
             return jsonify({"Erro" : "Dados inválidos"}), 400
-        # RECEBER USER DA DB
-        user = UtilizadorModel.get_user_by_nome(data["nome"], collUsers)
 
-        if user.check_login(data["password"]):
-            return jsonify({"token": "83e395725af4e8ccf208f91b8d84ac2257d8c772", "tipo": user.get_tipo()}), 200
+
+        response = UtilizadorDatabase.check_login(collUsers, data["nome"], data["password"])
+        if response:
+            return jsonify({"token": "83e395725af4e8ccf208f91b8d84ac2257d8c772", "tipo": response.get_tipo()}), 200
         else:
             return jsonify({"Erro": "Verifique as suas credenciais"}), 401
     except Exception as e:
@@ -67,13 +71,15 @@ def register():
 
         # AO REGISTAR É PRECISO IDENTIFICAR O TIPO E CRIAR PELA PRIMEIRA VEZ O SEU OBJETO
         user = None
-        if data["tipo"] == "admin":
+        if data["tipo"] == "Admin":
             user =  AdminModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"])
-        elif data["tipo"] == "entreveniente":
+        elif data["tipo"] == "Entreveniente":
             user = EntrevenienteModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"] , [])
-        elif data["tipo"] == "participante":
+        elif data["tipo"] == "Participante":
             user =  ParticipanteModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"], "" )
 
+        if UtilizadorDatabase.verificar_user_exists(collUsers, user.get_nome()):
+            raise Exception('Este nome de utilizador já existe!')
         success = user.criar_user(collUsers)
         if success:
             return jsonify({"Sucesso": "User criado"}), 200
@@ -91,7 +97,7 @@ def alterar_password():
         if data is None:
             return jsonify({"Erro" : "Dados inválidos"}), 400
         # VERIFICAR SE USER EXISTE
-        user = UtilizadorModel.get_user_by_nome(data["nome"], collUsers)
+        user = UtilizadorDatabase.get_user_by_nome(data["nome"], collUsers)
         if user is None:
             return jsonify({"Erro": "Utilizador não encontrado"}), 404
 
@@ -99,7 +105,7 @@ def alterar_password():
         if not user.verificar_password(data["password"]):
             return jsonify({"Erro": "A password deve ter mais de 6 caracteres!"})
 
-        success = user.alterar_password(data["password"], collUsers)
+        success = UtilizadorDatabase.alterar_password(data["nome"], data["password"], collUsers)
         if success:
             return jsonify({"Sucesso": "Password alterada com sucesso"}), 200
         else:
@@ -115,7 +121,7 @@ def alterar_password():
 @app.route("/get-user/<string:nome>", methods=['GET'])
 def get_user(nome):
     try:
-        user = UtilizadorModel.get_user_by_nome(nome, collUsers)
+        user = UtilizadorDatabase.get_user_by_nome(nome, collUsers)
         if user is None:
             return jsonify({"Erro": "Utilizador não encontrado!"}), 404
         return jsonify(user.__dict__), 200
@@ -128,18 +134,18 @@ def atualizar_user(nome):
     try:
         data = request.get_json()
 
-        user = UtilizadorModel.get_user_by_nome(nome, collUsers)
+        user = UtilizadorDatabase.get_user_by_nome(nome, collUsers)
 
         if user is None:
             return jsonify({"Erro": "Utilizador não encontrado!"}), 404
 
         # VERIFICAR O TIPO
         updatedUserData = None
-        if data["tipo"] == "admin":
+        if data["tipo"] == "Admin":
             updatedUserData =  AdminModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"])
-        elif data["tipo"] == "entreveniente":
+        elif data["tipo"] == "Entreveniente":
             updatedUserData = EntrevenienteModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"] , [])
-        elif data["tipo"] == "participante":
+        elif data["tipo"] == "Participante":
             updatedUserData =  ParticipanteModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"], "" )
 
         user.atualizar_user(updatedUserData, collUsers)
@@ -152,7 +158,7 @@ def atualizar_user(nome):
 def apagar_user(nome):
     try:
         data = request.get_json()
-        user = UtilizadorModel.get_user_by_nome(nome, collUsers)
+        user = UtilizadorDatabase.get_user_by_nome(nome, collUsers)
         if user is None:
             return jsonify({"Erro": "Utilizador não encontrado!"}), 404
 
@@ -202,10 +208,10 @@ def criar_evento():
         if data is None:
             return jsonify({"Erro" : "Dados inválidos"}), 400
         # VERIFICAR PERMISSÕES
-        if data["user_tipo"] != "admin":
+        if data["user_tipo"] != "Admin":
             return jsonify({"Erro" : "Não tem permissão para criar eventos"}), 401
 
-        evento = EventModel(data["nome_evento"], data["data_evento"], data["lista_atividades"], [], [])
+        evento = EventModel(data["nome_evento"], data["data_evento"], data["capacidade_evento"], data["lista_atividades"], [], )
         sucess = EventDatabase.criar_evento(evento, collEvents)
         if sucess:
             return jsonify({"Sucesso": "Evento criado"}), 200
@@ -221,7 +227,7 @@ def validar_atividade():
         data = request.get_json()
         if data is None:
             return jsonify({"Erro" : "Dados inválidos"}), 400
-        AtividadesModel(data["data_atividade"], data["hora_atividade"], data["descricao_atividade"], data["localidade_atividade"], [])
+        AtividadesModel(data["data_atividade"], data["hora_atividade"], data["descricao_atividade"], data["localidade_atividade"], data["restricoes"], [], [])
         return jsonify({"Sucesso": "Atividade validada com sucesso"}), 200
     except Exception as e:
         return jsonify({"Erro" : str(e)}), 400

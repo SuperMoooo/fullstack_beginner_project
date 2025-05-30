@@ -30,8 +30,6 @@ class EntrevenienteModel(UtilizadorModel, UtilizadorInterface):
     # CRIAR ADMIN
     def criar_user(self, collection) -> bool:
         try:
-            if UtilizadorModel.verificar_user_exists(collection, self.get_nome()):
-                raise Exception('Este nome de utilizador já existe!')
             collection.insert_one(self.__dict__)
             return True
         except Exception as e:

@@ -1,8 +1,5 @@
 from datetime import datetime
 import re
-from AdminModel import AdminModel
-from ParticipanteModel import ParticipanteModel
-from EntrevenienteModel import EntrevenienteModel
 
 class UtilizadorModel:
     # VARS
@@ -93,77 +90,6 @@ class UtilizadorModel:
 
     # FUNÇÕES
 
-    # VERIFICAR LOGIN
-    def check_login(self, password : str) -> bool:
-        try:
-            if self.get_password() == password:
-                return True
-            return False
-        except Exception as e:
-            print(e)
-            return False
-
-    # ALTERAR PASSWORD
-    def alterar_password(self, password : str, collection) -> bool:
-        try:
-            collection.update_one({"nome": self.get_nome()}, {"$set": {"password": password}})
-            return True
-        except Exception as e:
-            print(e)
-            raise
-
-
-    # ATUALIZAR USER
-    def atualizar_user(self, updatedUserData, collection):
-        try:
-            collection.delete_one({"nome": self.get_nome()})
-            collection.insert_one(updatedUserData.__dict__)
-            return True
-        except Exception as e:
-            print(e)
-            raise
-
-
-    # APAGAR USER
-    def apagar_user(self, collection):
-        try:
-            collection.delete_one({"nome": self.get_nome()})
-            return True
-        except Exception as e:
-            print(e)
-            raise
-
-
-    # VERIFICAR SE NOME DE UTILIZADOR JÁ EXISTE
-    @staticmethod
-    def verificar_user_exists(collection, nome) -> bool:
-        data = UtilizadorModel.get_users(collection)
-        for user in data:
-            if nome == user["nome"]:
-                return True
-        return False
-
-    # RECEBER TODOS OS USERS DA DB
-    @staticmethod
-    def get_users(collection) :
-        result = collection.find({})
-        return result
-
-    # RETORNAR USER BY NOME
-    @staticmethod
-    def get_user_by_nome(nome : str, collection):
-        user = collection.find({"nome": nome})
-        if user:
-            result = user[0]
-            if result["tipo"] == "admin":
-                return AdminModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"])
-            elif result["tipo"] == "entreveniente":
-                return EntrevenienteModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"] , [])
-            elif result["tipo"] == "participante":
-                return ParticipanteModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"], "" )
-        return None
-
-
     # VERIFICAÇÕES
 
     @staticmethod
@@ -183,7 +109,7 @@ class UtilizadorModel:
     @staticmethod
     def verificar_tipo(tipo : str):
         # VERIFICAR FORMATO DA DATA (dd/mm/yyyy)
-        return re.fullmatch(r"admin|user|participante", tipo.lower())
+        return re.fullmatch(r"admin|entreveniente|participante", tipo.lower())
 
     @staticmethod
     def verificar_sexo(sexo : str):

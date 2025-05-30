@@ -10,11 +10,13 @@ class AtividadesModel:
     hora_atividade : str
     descricao_atividade : str
     localidade_atividade : str
+    restricoes : list[str]
     participantes : list[ParticipanteModel]
+    comentarios : list[str]
 
     # CONSTRUTOR
 
-    def __init__(self, data_atividade : datetime, hora_atividade : str, descricao_atividade : str, localidade_atividade : str, participantes: list[ParticipanteModel]):
+    def __init__(self, data_atividade : datetime, hora_atividade : str, descricao_atividade : str, localidade_atividade : str, restricoes : list[str], participantes: list[ParticipanteModel], comentarios : list[str]):
         if not AtividadesModel.validar_data(data_atividade):
             raise Exception("A data da atividade está num formato inválido")
         self.data_atividade = data_atividade
@@ -24,11 +26,15 @@ class AtividadesModel:
         if descricao_atividade == '':
             raise Exception("A descrição da atividade não pode ser vazia")
         self.descricao_atividade = descricao_atividade
+
         if localidade_atividade == '':
             raise Exception("A localidade da atividade não pode ser vazia")
         self.localidade_atividade = localidade_atividade
 
+        self.restricoes = restricoes
+
         self.participantes = participantes
+        self.comentarios = comentarios
 
     # ENCAPSULAMENTO
 
@@ -46,9 +52,14 @@ class AtividadesModel:
     def get_localidade_atividade(self):
         return self.localidade_atividade
 
+    def get_restricoes(self):
+        return self.restricoes
+
     def get_participantes(self):
         return self.participantes
 
+    def get_comentarios(self):
+        return self.comentarios
     # SETS
 
     def set_data_atividade(self, data_atividade : datetime):
@@ -71,8 +82,14 @@ class AtividadesModel:
             raise Exception("A localidade da atividade não pode ser vazia")
         self.localidade_atividade = localidade_atividade
 
+    def set_restricoes(self, restricoes : list[str]):
+        self.restricoes = restricoes
+
     def set_participantes(self, participantes : list[ParticipanteModel]):
         self.participantes = participantes
+
+    def set_comentarios(self, comentarios : list[str]):
+        self.comentarios = comentarios
 
     # FIM ENCAPSULAMENTO
 

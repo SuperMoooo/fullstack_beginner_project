@@ -3,14 +3,16 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import Loading from '../components/loading';
 import TitleInput from '../components/title_input';
-import { Tipo } from '../util/types';
+import { Sexo, Tipo } from '../util/types';
+import TitleSelect from '../components/title_select';
 
 export default function RegisterPage() {
     const [nome, setNome] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [data_nascimento, setDataNascimento] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [tipo, setTipo] = useState<Tipo>('admin');
+    const [tipo, setTipo] = useState<Tipo>('Admin');
+    const [sexo, setSexo] = useState<Sexo>('Homem');
     const [nif, setNif] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
@@ -31,36 +33,22 @@ export default function RegisterPage() {
                 return;
             }
             let response;
-            if (tipo == 'user') {
-                response = await fetch('http://127.0.0.1:5000/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        nome: nome,
-                        email: email,
-                        data_nascimento: birthDate,
-                        password: password,
-                        tipo: tipo,
-                        nif: nif,
-                    }),
-                });
-            } else {
-                response = await fetch('http://127.0.0.1:5000/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        nome: nome,
-                        email: email,
-                        data_nascimento: birthDate,
-                        password: password,
-                        tipo: tipo,
-                    }),
-                });
-            }
+
+            response = await fetch('http://127.0.0.1:5000/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    nome: nome,
+                    email: email,
+                    data_nascimento: birthDate,
+                    sexo: sexo,
+                    nif: nif,
+                    password: password,
+                    tipo: tipo,
+                }),
+            });
 
             // SALVAR TOKEN E LIMITE
             if (response.ok) {
@@ -98,19 +86,11 @@ export default function RegisterPage() {
                     onSubmit={register}
                 >
                     <h1 className="text-3xl">Criar conta</h1>
-                    <div className="w-full flex items-start justify-between flex-col gap-2">
-                        <h1 className="text-lg">Tipo de Utilizador</h1>
-                        <select
-                            name="tipo"
-                            id="tipo"
-                            onChange={(e) => setTipo(e.target.value as Tipo)}
-                            className="rounded-md border border-gray-300 bg-gray-100 p-2 outline-none w-full"
-                        >
-                            <option value="admin">Admin</option>
-                            <option value="user">Usuário</option>
-                            <option value="participante">Participante</option>
-                        </select>
-                    </div>
+                    <TitleSelect
+                        title="Tipo Utilizador"
+                        setValor={setTipo}
+                        valores={['Admin', 'Entreveniente', 'Participante']}
+                    />
 
                     <TitleInput
                         setValor={setNome}
@@ -132,6 +112,24 @@ export default function RegisterPage() {
                         inputType="date"
                         error={error.toLocaleLowerCase().includes('data')}
                     />
+                    <TitleSelect
+                        title="Sexo"
+                        setValor={setSexo}
+                        valores={[
+                            'Homem',
+                            'Mulher',
+                            'Outro',
+                            'Prefiro não dizer',
+                        ]}
+                    />
+
+                    <TitleInput
+                        setValor={setNif}
+                        valor={nif}
+                        titulo="Nif"
+                        error={error.toLocaleLowerCase().includes('nif')}
+                    />
+
                     <TitleInput
                         setValor={setPassword}
                         valor={password}
@@ -139,15 +137,6 @@ export default function RegisterPage() {
                         inputType="password"
                         error={error.toLocaleLowerCase().includes('password')}
                     />
-
-                    {tipo == 'user' && (
-                        <TitleInput
-                            setValor={setNif}
-                            valor={nif}
-                            titulo="Nif"
-                            error={error.toLocaleLowerCase().includes('nif')}
-                        />
-                    )}
 
                     <button
                         className="border rounded-2xl text-white bg-blue-500 p-4 w-full cursor-pointer hover:bg-blue-400"

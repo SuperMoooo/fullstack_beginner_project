@@ -9,7 +9,7 @@ import EventCard from './event_card';
 export default function Eventos() {
     const [loading, setLoading] = useState<boolean>(false);
     const [eventos, setEventos] = useState<Evento[]>([]);
-    const [tipo, setTipo] = useState<Tipo>('user');
+    const [tipo, setTipo] = useState<Tipo>('Entreveniente');
     const [error, setError] = useState<string>('');
 
     useEffect(() => {
@@ -52,7 +52,7 @@ export default function Eventos() {
         <main className="grid grid-rows-[auto_1fr] min-h-[100dvh]">
             <Navbar />
             <section className="flex items-center justify-start gap-6 flex-col w-full p-20">
-                {tipo == 'admin' && (
+                {tipo == 'Admin' && (
                     <aside className="flex items-center justify-end w-full gap-4">
                         <Link
                             href={{ pathname: '/eventos/adicionar_evento' }}
