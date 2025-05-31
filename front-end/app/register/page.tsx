@@ -50,7 +50,6 @@ export default function RegisterPage() {
                 }),
             });
 
-            // SALVAR TOKEN E LIMITE
             if (response.ok) {
                 alert('Sucesso');
                 setError('');

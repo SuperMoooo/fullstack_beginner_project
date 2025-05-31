@@ -16,7 +16,8 @@ export type Atividade = {
     descricao_atividade: string;
     localidade_atividade: string;
     restricoes: string;
-    entrevenientes: Entreveniente[];
+    entrevenientes: Entreveniente[] | undefined;
+    lista_participantes: Participante[] | undefined;
     comentarios: string[] | undefined;
 };
 
@@ -44,5 +45,4 @@ export type Evento = {
     data_evento: string;
     capacidade_evento: number;
     lista_atividades: Atividade[];
-    lista_participantes: Participante[] | undefined;
 };

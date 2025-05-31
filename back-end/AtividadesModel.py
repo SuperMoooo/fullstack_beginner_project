@@ -3,6 +3,7 @@ from datetime import datetime
 from ParticipanteModel import ParticipanteModel
 import random
 import string
+from EntrevenienteModel import EntrevenienteModel
 
 class AtividadesModel:
 
@@ -14,12 +15,14 @@ class AtividadesModel:
     descricao_atividade : str
     localidade_atividade : str
     restricoes : list[str]
-    participantes : list[ParticipanteModel]
+    lista_participantes : list[ParticipanteModel]
+    lista_entrevenientes : list[EntrevenienteModel]
     comentarios : list[str]
+
 
     # CONSTRUTOR
 
-    def __init__(self, identificador : str, data_atividade : datetime, hora_atividade : str, descricao_atividade : str, localidade_atividade : str, restricoes : list[str], participantes: list[ParticipanteModel], comentarios : list[str]):
+    def __init__(self, identificador : str, data_atividade : datetime, hora_atividade : str, descricao_atividade : str, localidade_atividade : str, restricoes : list[str], lista_participantes: list[ParticipanteModel], lista_entrevenientes : list[EntrevenienteModel],  comentarios : list[str]):
         self.identificador = identificador
         if not AtividadesModel.validar_data(data_atividade):
             raise Exception("A data da atividade está num formato inválido")
@@ -37,7 +40,10 @@ class AtividadesModel:
 
         self.restricoes = restricoes
 
-        self.participantes = participantes
+        self.lista_participantes = lista_participantes
+
+        self.lista_entrevenientes = lista_entrevenientes
+
         self.comentarios = comentarios
 
     # ENCAPSULAMENTO
@@ -62,8 +68,11 @@ class AtividadesModel:
     def get_restricoes(self):
         return self.restricoes
 
-    def get_participantes(self):
+    def get_lista_participantes(self):
         return self.participantes
+
+    def get_lista_entrevenientes(self):
+        return self.lista_entrevenientes
 
     def get_comentarios(self):
         return self.comentarios
@@ -92,8 +101,11 @@ class AtividadesModel:
     def set_restricoes(self, restricoes : list[str]):
         self.restricoes = restricoes
 
-    def set_participantes(self, participantes : list[ParticipanteModel]):
-        self.participantes = participantes
+    def set_lista_participantes(self, lista_participantes : list[ParticipanteModel]):
+        self.lista_participantes = lista_participantes
+
+    def set_lista_entrevenientes(self, lista_entrevenientes : list[EntrevenienteModel]):
+        self.lista_entrevenientes = lista_entrevenientes
 
     def set_comentarios(self, comentarios : list[str]):
         self.comentarios = comentarios

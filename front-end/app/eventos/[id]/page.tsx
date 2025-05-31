@@ -41,27 +41,22 @@ export default function EventoDetalhes() {
         try {
             setLoading(true);
             const token = localStorage.getItem('token');
-            const limite = localStorage.getItem('token_limite');
-            if (token && limite && Date.now() < parseInt(limite, 10)) {
-                const response = await fetch(
-                    `http://127.0.0.1:5000/evento/${id}`,
-                    {
-                        method: 'GET',
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            'Content-Type': 'application/json',
-                        },
-                    }
-                );
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log(data);
-                    setEvento(data);
-                    setError('');
-                } else {
-                    const errorData = await response.json();
-                    setError(errorData['Erro'] ?? 'Erro desconhecido');
-                }
+
+            const response = await fetch(`http://127.0.0.1:5000/evento/${id}`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                console.log(data);
+                setEvento(data);
+                setError('');
+            } else {
+                const errorData = await response.json();
+                setError(errorData['Erro'] ?? 'Erro desconhecido');
             }
         } catch (error: any) {
             if (error.message.includes('NetworkError')) {

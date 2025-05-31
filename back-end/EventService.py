@@ -2,7 +2,6 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pymongo import MongoClient
 
-from UtilizadorModel import UtilizadorModel
 from EntrevenienteModel import EntrevenienteModel
 from ParticipanteModel import ParticipanteModel
 from AdminModel import AdminModel
@@ -10,9 +9,11 @@ from AdminModel import AdminModel
 from EventModel import EventModel
 from AtividadesModel import AtividadesModel
 
-# EXCLUIR
 from UtilizadorDatabase import UtilizadorDatabase
 from EventDatabase import EventDatabase
+
+from Hooks import Hooks
+
 
 # APP
 app = Flask(__name__)
@@ -210,8 +211,8 @@ def criar_evento():
         # VERIFICAR PERMISSÕES
         if data["user_tipo"] != "Admin":
             return jsonify({"Erro" : "Não tem permissão para criar eventos"}), 401
-        atividades = [AtividadesModel(AtividadesModel.identificador_aleatorio(), d["data_atividade"], d["hora_atividade"], d["descricao_atividade"], d["localidade_atividade"], d["restricoes"], [],[]) for d in data["lista_atividades"]]
-        evento = EventModel(data["nome_evento"], data["data_evento"], data["capacidade_evento"], [ativi.__dict__ for ativi in atividades] , [], )
+        atividades = [AtividadesModel(AtividadesModel.identificador_aleatorio(), d["data_atividade"], d["hora_atividade"], d["descricao_atividade"], d["localidade_atividade"], d["restricoes"], [],[], []) for d in data["lista_atividades"]]
+        evento = EventModel(data["nome_evento"], data["data_evento"], data["capacidade_evento"], [ativi.__dict__ for ativi in atividades])
         sucess = EventDatabase.criar_evento(evento, collEvents)
         if sucess:
             return jsonify({"Sucesso": "Evento criado"}), 200
@@ -232,6 +233,28 @@ def eliminar_evento(id):
     except Exception as e:
         return jsonify({"Erro" : str(e)}), 400
 
+
+@app.route("/importar-evento", methods=['POST'])
+def importar_evento():
+    try:
+        file = request.files['csvFile']
+        if not file:
+            return jsonify({"Erro" : "Ficheiro inválio"}), 400
+        if file.content_type != "application/vnd.ms-excel":
+            return jsonify({"Erro" : "Ficheiro não é csv"}), 400
+        file.save("csv_file_evento.csv")
+        result = Hooks.get_csv_data("./csv_file_evento.csv")
+        for data in result:
+            atividades = [AtividadesModel(AtividadesModel.identificador_aleatorio(), d["data_atividade"], d["hora_atividade"], d["descricao_atividade"], d["localidade_atividade"], d["restricoes"], [],[], []) for d in data["lista_atividades"]]
+            evento = EventModel(data["nome_evento"], data["data_evento"], int(data["capacidade_evento"]), [ativi.__dict__ for ativi in atividades])
+            sucess = EventDatabase.criar_evento(evento, collEvents)
+            if not sucess:
+                return jsonify({"Erro": "Não foi possivel importar o evento"}), 400
+        file.close()
+        return jsonify({"Sucesso": "Evento importado"}), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"Erro" : str(e)}), 400
 # ::::::::::::: FIM EVENTO ::::::::::::::::
 
 
@@ -245,7 +268,7 @@ def validar_atividade():
         data = request.get_json()
         if data is None:
             return jsonify({"Erro" : "Dados inválidos"}), 400
-        AtividadesModel("" ,data["data_atividade"], data["hora_atividade"], data["descricao_atividade"], data["localidade_atividade"], data["restricoes"], [], [])
+        AtividadesModel("" ,data["data_atividade"], data["hora_atividade"], data["descricao_atividade"], data["localidade_atividade"], data["restricoes"], [], [], [])
         return jsonify({"Sucesso": "Atividade validada com sucesso"}), 200
     except Exception as e:
         print(e)
@@ -257,7 +280,7 @@ def atualizar_atividade(identificador):
         data = request.get_json()
         if identificador is None or data is None:
             return jsonify({"Erro" : "Atividade não encontrada"}), 400
-        updatedAtividade = AtividadesModel(identificador, data["data_atividade"], data["hora_atividade"], data["descricao_atividade"], data["localidade_atividade"], data["restricoes"], [], [])
+        updatedAtividade = AtividadesModel(identificador, data["data_atividade"], data["hora_atividade"], data["descricao_atividade"], data["localidade_atividade"], data["restricoes"], [], [], [])
         sucess = EventDatabase.atualizar_atividade(identificador, updatedAtividade,  collEvents)
         if sucess:
             return jsonify({"Sucesso": "Atividade atualizada"}), 200

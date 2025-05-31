@@ -3,7 +3,7 @@ from datetime import datetime
 from AtividadesModel import AtividadesModel
 from EventDatabase import EventDatabase
 from pymongo import MongoClient
-from EntrevenienteModel import EntrevenienteModel
+
 
 class EventModel:
     id : int
@@ -11,10 +11,9 @@ class EventModel:
     data_evento : datetime
     capacidade_evento: int
     lista_atividades : list[AtividadesModel]
-    lista_entrevenientes : list[EntrevenienteModel]
 
     # CONSTRUTOR
-    def __init__(self, nome_evento : str, data_evento :  datetime, capacidade_evento : int, lista_atividades : list[AtividadesModel], lista_entrevenientes : list[EntrevenienteModel]):
+    def __init__(self, nome_evento : str, data_evento :  datetime, capacidade_evento : int, lista_atividades : list[AtividadesModel]):
         self.id = EventModel.get_id()
         if nome_evento == '':
             raise Exception('O nome do evento não pode ser vazio')
@@ -33,12 +32,15 @@ class EventModel:
 
         self.lista_atividades = lista_atividades
 
-        self.lista_entrevenientes = lista_entrevenientes
+
 
 
     # ENCAPSULAMENTO
 
     # GETS
+
+    def get_id(self):
+        return self.id
 
     def get_nome_evento(self):
         return self.nome_evento
@@ -52,8 +54,6 @@ class EventModel:
     def get_lista_atividades(self):
         return self.lista_atividades
 
-    def get_lista_entrevenientes(self):
-        return self.lista_entrevenientes
 
 
     # SETS
@@ -79,8 +79,7 @@ class EventModel:
             raise Exception("Lista de Atividades vazia")
         self.lista_atividades = lista_atividades
 
-    def set_lista_entrevenientes(self, lista_entrevenientes : list[EntrevenienteModel]):
-        self.lista_entrevenientes = lista_entrevenientes
+
 
 
 
