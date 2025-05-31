@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import TitleInput from '../components/title_input';
-import { Tipo } from '../util/types';
+import { Sexo, Tipo } from '../util/types';
 import Loading from '../components/loading';
 import UpdateDataForm from './updateDataForm';
 import DeleteAccountForm from './deleteAccountForm';
@@ -12,8 +12,9 @@ export default function Account() {
     const [email, setEmail] = useState<string>('');
     const [data_nascimento, setDataNascimento] = useState<string>('');
     const [password, setPassword] = useState<string>('');
-    const [tipo, setTipo] = useState<Tipo>('admin');
+    const [tipo, setTipo] = useState<Tipo>('Admin');
     const [nif, setNif] = useState<string>('');
+    const [sexo, setSexo] = useState<Sexo>('Homem');
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
@@ -49,9 +50,8 @@ export default function Account() {
                 setDataNascimento(data['data_nascimento']);
                 setTipo(data['tipo']);
                 setPassword(data['password']);
-                if (data['tipo'] == 'user') {
-                    setNif(data['nif']);
-                }
+                setNif(data['nif']);
+                setSexo(data['sexo']);
             } else {
                 const errorData = await response.json();
                 setError(errorData['Erro'] ?? 'Erro desconhecido');
@@ -88,6 +88,7 @@ export default function Account() {
                         password: password,
                         tipo: tipo,
                         nif: nif,
+                        sexo: sexo,
                     }),
                 }
             );
@@ -203,6 +204,8 @@ export default function Account() {
                                 data_nascimento={data_nascimento}
                                 password={password}
                                 nif={nif}
+                                sexo={sexo}
+                                setSexo={setSexo}
                                 error={error}
                             />
                         ) : (

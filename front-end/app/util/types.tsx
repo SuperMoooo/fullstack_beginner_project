@@ -2,7 +2,15 @@ export type Tipo = 'Admin' | 'Entreveniente' | 'Participante';
 
 export type Sexo = 'Homem' | 'Mulher' | 'Outro' | 'Prefiro não dizer';
 
+export const restricoesPossiveis = [
+    'Sem restrições',
+    'Idade mínima de 18 anos',
+    'Idade mínima de 16 anos',
+    'Idade mínima de 12 anos',
+];
+
 export type Atividade = {
+    identificador: string;
     data_atividade: string;
     hora_atividade: string;
     descricao_atividade: string;

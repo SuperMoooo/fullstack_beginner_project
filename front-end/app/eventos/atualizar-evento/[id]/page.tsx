@@ -4,10 +4,15 @@ import Navbar from '@/app/components/Navbar';
 import TitleInput from '@/app/components/title_input';
 import { Atividade, restricoesPossiveis } from '@/app/util/types';
 import React, { useEffect, useState } from 'react';
-import AtividadeCard from '../[id]/atividade_card';
+import AtividadeCard from '../../[id]/atividade_card';
 import AtividadeForm from '@/app/components/atividade_form';
+import { useParams } from 'next/navigation';
 
-export default function AdicionarEvento() {
+export default function AtualizarEvento() {
+    // PARAMS
+    const params = useParams();
+    const id = params.id;
+    // EVENTO
     const [loading, setLoading] = useState<boolean>(false);
     const [nomeEvento, setNomeEvento] = useState<string>('');
     const [dataEvento, setDataEvento] = useState<string>('');
@@ -24,8 +29,52 @@ export default function AdicionarEvento() {
     const [restricoes, setRestricoes] = useState<string>('Sem restrições');
     const [errorAtividade, setErrorAtividade] = useState<string>('');
 
+    useEffect(() => {
+        getEvento();
+    }, []);
+
+    const getEvento = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            const limite = localStorage.getItem('token_limite');
+            if (token && limite && Date.now() < parseInt(limite, 10)) {
+                const response = await fetch(
+                    `http://127.0.0.1:5000/evento/${id}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(data);
+                    setNomeEvento(data['nome_evento']);
+                    setCapacidadeEvento(data['capacidade_evento']);
+                    setDataEvento(data['data_evento']);
+                    setAtividades(data['lista_atividades']);
+                    setError('');
+                } else {
+                    const errorData = await response.json();
+                    setError(errorData['Erro'] ?? 'Erro desconhecido');
+                }
+            }
+        } catch (error: any) {
+            if (error.message.includes('NetworkError')) {
+                setError('Servidor Offline');
+            } else {
+                setError(error.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // CRIAR EVENTO
-    const handleCreateEvento = async (e: any) => {
+    const handleUpdateEvento = async (e: any) => {
         try {
             e.preventDefault();
             let day = dataEvento.split('-')[2];
@@ -127,7 +176,7 @@ export default function AdicionarEvento() {
             <Navbar goBack={true} />
             <form
                 className="flex items-center justify-start gap-6 flex-col w-full p-20"
-                onSubmit={handleCreateEvento}
+                onSubmit={handleUpdateEvento}
             >
                 <aside className="flex items-center justify-start w-full gap-6">
                     <TitleInput
@@ -189,7 +238,7 @@ export default function AdicionarEvento() {
                     type="submit"
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
                 >
-                    Criar Evento
+                    Salvar Evento
                 </button>
                 {error && !error.includes('undefined') && (
                     <p className="text-red-500">{error}</p>

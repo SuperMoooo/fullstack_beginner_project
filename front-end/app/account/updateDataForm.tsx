@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tipo } from '../util/types';
 import TitleInput from '../components/title_input';
+import TitleSelect from '../components/title_select';
 
 export default function UpdateDataForm({
     handleUpdateUserInfo,
@@ -16,6 +17,8 @@ export default function UpdateDataForm({
     data_nascimento,
     password,
     nif,
+    sexo,
+    setSexo,
     error,
 }: {
     handleUpdateUserInfo: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -31,6 +34,8 @@ export default function UpdateDataForm({
     data_nascimento: string;
     password: string;
     nif: string;
+    sexo: string;
+    setSexo: any;
     error: string;
 }) {
     return (
@@ -38,20 +43,11 @@ export default function UpdateDataForm({
             onSubmit={handleUpdateUserInfo}
             className="border rounded-2xl shadow-2xl flex items-center justify-center gap-6 flex-col w-2/4 p-10"
         >
-            <div className="w-full flex items-start justify-between flex-col gap-2">
-                <h1 className="text-lg">Tipo de Utilizador</h1>
-                <select
-                    defaultValue={tipo}
-                    name="tipo"
-                    id="tipo"
-                    onChange={(e) => setTipo(e.target.value as Tipo)}
-                    className="rounded-md border border-gray-300 bg-gray-100 p-2 outline-none w-full"
-                >
-                    <option value="admin">Admin</option>
-                    <option value="user">Usuário</option>
-                    <option value="participante">Participante</option>
-                </select>
-            </div>
+            <TitleSelect
+                title="Tipo Utilizador"
+                setValor={setTipo}
+                valores={['Admin', 'Entreveniente', 'Participante']}
+            />
 
             <TitleInput
                 setValor={setNome}
@@ -80,15 +76,18 @@ export default function UpdateDataForm({
                 inputType="password"
                 error={error.toLocaleLowerCase().includes('password')}
             />
+            <TitleSelect
+                title="Sexo"
+                setValor={setSexo}
+                valores={['Homem', 'Mulher', 'Outro', 'Prefiro não dizer']}
+            />
 
-            {tipo == 'user' && (
-                <TitleInput
-                    setValor={setNif}
-                    valor={nif}
-                    titulo="Nif"
-                    error={error.toLocaleLowerCase().includes('nif')}
-                />
-            )}
+            <TitleInput
+                setValor={setNif}
+                valor={nif}
+                titulo="Nif"
+                error={error.toLocaleLowerCase().includes('nif')}
+            />
 
             <button
                 className="border rounded-2xl text-white bg-blue-500 p-4 w-full cursor-pointer hover:bg-blue-400"

@@ -16,8 +16,8 @@ class EventDatabase:
     @staticmethod
     def criar_evento(evento, collection):
         try:
-            collection.insert_one(evento.__dict__)
-            return True
+            res = collection.insert_one(evento.__dict__)
+            return res.inserted_id
         except Exception as e:
             print(e)
             raise
@@ -46,3 +46,40 @@ class EventDatabase:
         except Exception as e:
             print(e)
             raise
+
+    @staticmethod
+    def eliminar_evento(id, collection):
+        try:
+            res = collection.delete_one({ "id" : id })
+            return res.deleted_count
+        except Exception as e:
+            print(e)
+            raise
+
+
+    # ATIVIDADES RELATED
+    @staticmethod
+    def delete_atividade(identificador : str, collection):
+        try:
+            res = collection.update_one(
+                {"lista_atividades.identificador": identificador},
+                {"$pull": {"lista_atividades": {"identificador": identificador}}}
+            )
+            return res.modified_count
+        except Exception as e:
+            print(e)
+            raise
+
+    @staticmethod
+    def atualizar_atividade(identificador: str, updatedAtividade, collection):
+        try:
+            res = collection.update_one(
+                {"lista_atividades.identificador": identificador},
+                {"$set": {"lista_atividades.$": updatedAtividade.__dict__}}
+            )
+            return res.modified_count
+        except Exception as e:
+            print(e)
+            raise
+
+

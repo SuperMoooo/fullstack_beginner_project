@@ -1,11 +1,14 @@
 import re
 from datetime import datetime
 from ParticipanteModel import ParticipanteModel
+import random
+import string
 
 class AtividadesModel:
 
     # VARS
 
+    identificador : str
     data_atividade : datetime
     hora_atividade : str
     descricao_atividade : str
@@ -16,7 +19,8 @@ class AtividadesModel:
 
     # CONSTRUTOR
 
-    def __init__(self, data_atividade : datetime, hora_atividade : str, descricao_atividade : str, localidade_atividade : str, restricoes : list[str], participantes: list[ParticipanteModel], comentarios : list[str]):
+    def __init__(self, identificador : str, data_atividade : datetime, hora_atividade : str, descricao_atividade : str, localidade_atividade : str, restricoes : list[str], participantes: list[ParticipanteModel], comentarios : list[str]):
+        self.identificador = identificador
         if not AtividadesModel.validar_data(data_atividade):
             raise Exception("A data da atividade está num formato inválido")
         self.data_atividade = data_atividade
@@ -39,6 +43,9 @@ class AtividadesModel:
     # ENCAPSULAMENTO
 
     # GETS
+
+    def get_identificador(self):
+        return self.identificador
 
     def get_data_atividade(self):
         return self.data_atividade
@@ -103,3 +110,8 @@ class AtividadesModel:
     def validar_hora(hora : str):
         # VERIFICAR FORMATO DA HORA (hh:mm)
         return re.fullmatch(r"\d{2}:\d{2}", str(hora))
+
+    @staticmethod
+    def identificador_aleatorio():
+        caracteres = string.ascii_letters + string.digits
+        return ''.join(random.choices(caracteres, k=15))

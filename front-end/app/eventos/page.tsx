@@ -72,7 +72,7 @@ export default function Eventos() {
                     <h1 className="text-2xl font-bold self-start">Eventos</h1>
                 )}
                 <section
-                    className={`flex items-center ${
+                    className={`flex items-center gap-8 flex-wrap ${
                         eventos.length > 0 ? 'justify-start' : 'justify-center'
                     }  w-full`}
                 >

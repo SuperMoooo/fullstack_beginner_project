@@ -16,12 +16,24 @@ export default function TitleInput({
     readOnly?: boolean;
 }) {
     const [showPassword, setShowPassword] = useState(false);
+
+    // FORMATAR DATA
+    function formatDateForInput(dateStr: string): string {
+        const [day, month, year] = dateStr.split('/');
+        return `${year}-${month}-${day}`;
+    }
     return (
         <div className="flex items-start flex-col justify-center gap-2 w-full relative">
             <h1 className="text-lg">{titulo}</h1>
             <input
                 readOnly={readOnly}
-                value={valor}
+                value={
+                    inputType === 'date' &&
+                    typeof valor === 'string' &&
+                    valor.includes('/')
+                        ? formatDateForInput(valor)
+                        : valor
+                }
                 onChange={(e) => setValor(e.target.value)}
                 type={showPassword ? 'text' : inputType ? inputType : 'text'}
                 className={`rounded-md border  bg-gray-100 p-2 outline-none w-full ${

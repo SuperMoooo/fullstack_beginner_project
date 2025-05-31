@@ -210,15 +210,33 @@ def criar_evento():
         # VERIFICAR PERMISSÕES
         if data["user_tipo"] != "Admin":
             return jsonify({"Erro" : "Não tem permissão para criar eventos"}), 401
-
-        evento = EventModel(data["nome_evento"], data["data_evento"], data["capacidade_evento"], data["lista_atividades"], [], )
+        atividades = [AtividadesModel(AtividadesModel.identificador_aleatorio(), d["data_atividade"], d["hora_atividade"], d["descricao_atividade"], d["localidade_atividade"], d["restricoes"], [],[]) for d in data["lista_atividades"]]
+        evento = EventModel(data["nome_evento"], data["data_evento"], data["capacidade_evento"], [ativi.__dict__ for ativi in atividades] , [], )
         sucess = EventDatabase.criar_evento(evento, collEvents)
         if sucess:
             return jsonify({"Sucesso": "Evento criado"}), 200
-        else:
-            return jsonify({"Erro" : "Erro ao criar evento"}), 400
+
+        return jsonify({"Erro" : "Erro ao criar evento"}), 400
     except Exception as e:
         return jsonify({"Erro" : str(e)}), 400
+
+@app.route("/eliminar-evento/<int:id>", methods=['DELETE'])
+def eliminar_evento(id):
+    try:
+        if not id:
+            return jsonify({"Erro" : "Evento não encontrado"}), 400
+        sucess = EventDatabase.eliminar_evento(id, collEvents)
+        if sucess:
+            return jsonify({"Sucesso": "Evento eliminado"}), 200
+        return jsonify({"Erro" : "Erro ao eliminar evento"}), 400
+    except Exception as e:
+        return jsonify({"Erro" : str(e)}), 400
+
+# ::::::::::::: FIM EVENTO ::::::::::::::::
+
+
+# ::::::::::::: ATIVIDADE ::::::::::::::::
+
 
 # VALIDAR INSERIR ATIVIDADE
 @app.route("/validar-atividade", methods=['POST'])
@@ -227,12 +245,41 @@ def validar_atividade():
         data = request.get_json()
         if data is None:
             return jsonify({"Erro" : "Dados inválidos"}), 400
-        AtividadesModel(data["data_atividade"], data["hora_atividade"], data["descricao_atividade"], data["localidade_atividade"], data["restricoes"], [], [])
+        AtividadesModel("" ,data["data_atividade"], data["hora_atividade"], data["descricao_atividade"], data["localidade_atividade"], data["restricoes"], [], [])
         return jsonify({"Sucesso": "Atividade validada com sucesso"}), 200
     except Exception as e:
+        print(e)
+        return jsonify({"Erro" : str(e)}), 400
+
+@app.route("/atualizar-atividade/<string:identificador>", methods=['PUT'])
+def atualizar_atividade(identificador):
+    try:
+        data = request.get_json()
+        if identificador is None or data is None:
+            return jsonify({"Erro" : "Atividade não encontrada"}), 400
+        updatedAtividade = AtividadesModel(identificador, data["data_atividade"], data["hora_atividade"], data["descricao_atividade"], data["localidade_atividade"], data["restricoes"], [], [])
+        sucess = EventDatabase.atualizar_atividade(identificador, updatedAtividade,  collEvents)
+        if sucess:
+            return jsonify({"Sucesso": "Atividade atualizada"}), 200
+        return jsonify({"Erro": "Não foi possível atualizar a atividade"}), 400
+    except Exception as e:
+        print(e)
         return jsonify({"Erro" : str(e)}), 400
 
 
+@app.route("/eliminar-atividade/<string:identificador>", methods=['PUT'])
+def eliminar_atividade(identificador):
+    try:
+        if not identificador:
+            return jsonify({"Erro" : "Atividade não encontrada"}), 404
+        sucess = EventDatabase.delete_atividade(identificador, collEvents)
+        if sucess:
+            return jsonify({"Sucesso": "Atividade removida com sucesso"}), 200
+
+        return jsonify({"Erro": "Erro ao remover atividade"}), 400
+
+    except Exception as e:
+        return jsonify({"Erro" : str(e)}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)
