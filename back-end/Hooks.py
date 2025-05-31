@@ -83,6 +83,8 @@ class Hooks:
 
     @staticmethod
     def traduzir_texto(text, lingua):
+        if lingua == "pt":
+            return text
         tradutor = Translator()
         resultado = tradutor.translate(text, src='pt', dest=lingua)
         return resultado.text
