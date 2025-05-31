@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 from pymongo import MongoClient
 
@@ -255,6 +255,29 @@ def importar_evento():
     except Exception as e:
         print(e)
         return jsonify({"Erro" : str(e)}), 400
+
+
+@app.route("/exportar-evento-pdf/<int:id>/<string:lingua>", methods=['GET'])
+def exportar_evento_pdf(id, lingua):
+    try:
+        if not id or not lingua:
+            return jsonify({"Erro" : "Evento não encontrado"}), 400
+        evento = EventDatabase.get_evento(id, collEvents)
+
+
+        if not evento:
+            return jsonify({"Erro" : "Evento não encontrado"}), 400
+
+        Hooks.criar_pdf(EventModel(evento["nome_evento"], evento["data_evento"], evento["capacidade_evento"], evento["lista_atividades"]), lingua)
+        Hooks.anonimar_pdf(lingua, "./evento_pdf.pdf")
+        return send_file("./evento_pdf_anonimado.pdf", as_attachment=True), 200
+
+    except Exception as e:
+        print(e)
+        return jsonify({"Erro" : str(e)}), 400
+
+
+
 # ::::::::::::: FIM EVENTO ::::::::::::::::
 
 

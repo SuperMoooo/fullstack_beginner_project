@@ -21,7 +21,7 @@ export default function Eventos() {
 
     useEffect(() => {
         const tipo = localStorage.getItem('tipo');
-        setTipo((tipo as Tipo) ?? 'user');
+        setTipo((tipo as Tipo) ?? 'Entreveniente');
         getEventos();
     }, []);
 
@@ -47,6 +47,7 @@ export default function Eventos() {
         } catch (error: any) {
             if (error.message.includes('NetworkError')) {
                 setError('Servidor Offline');
+                setTipo('Entreveniente');
             } else {
                 setError(error.message);
             }

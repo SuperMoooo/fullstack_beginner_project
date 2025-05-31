@@ -16,10 +16,13 @@ export default function EventoDetalhes() {
     const [evento, setEvento] = useState<Evento>();
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
+    const [exportarLingua, setExportarLingua] = useState<string>('pt');
 
     // MODALS
     const [showDeleteEvento, setShowDeleteEvento] = useState<boolean>(false);
     const [showDeleteAtividade, setShowDeleteAtividade] =
+        useState<boolean>(false);
+    const [showExportarEvento, setShowExportarEvento] =
         useState<boolean>(false);
 
     // ATIVIDADES
@@ -32,6 +35,7 @@ export default function EventoDetalhes() {
     const [errorAtividade, setErrorAtividade] = useState<string>('');
     const [atividadeIdentificador, setAtividadeIdentificador] =
         useState<string>('');
+    const [totalParticipantes, setTotalParticipantes] = useState<number>(0);
 
     useEffect(() => {
         getEvento();
@@ -51,9 +55,15 @@ export default function EventoDetalhes() {
             });
             if (response.ok) {
                 const data = await response.json();
-                console.log(data);
                 setEvento(data);
                 setError('');
+                let total: number = 0;
+                for (let i = 0; i < data['lista_atividades'].length; i++) {
+                    total +=
+                        data['lista_atividades'][i]['lista_participantes']
+                            .length;
+                }
+                setTotalParticipantes(total);
             } else {
                 const errorData = await response.json();
                 setError(errorData['Erro'] ?? 'Erro desconhecido');
@@ -211,6 +221,43 @@ export default function EventoDetalhes() {
             setLoading(false);
         }
     };
+
+    const handleExportEvento = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            const response = await fetch(
+                `http://127.0.0.1:5000/exportar-evento-pdf/${id}/${exportarLingua}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'evento.pdf');
+                document.body.appendChild(link);
+                link.click();
+                link.parentNode?.removeChild(link);
+            } else {
+                const errorData = await response.json();
+                setError(errorData['Erro'] ?? 'Erro desconhecido');
+            }
+        } catch (error: any) {
+            if (error.message.includes('NetworkError')) {
+                setError('Servidor Offline');
+            } else {
+                setError(error.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
     return (
         <main className="grid grid-rows-[auto_1fr] min-h-[100dvh]">
             <Navbar goBack={true} />
@@ -224,6 +271,14 @@ export default function EventoDetalhes() {
                                 {evento?.nome_evento}
                             </h1>
                             <div className="flex items-center justify-center gap-4">
+                                <button
+                                    onClick={() =>
+                                        setShowExportarEvento((prev) => !prev)
+                                    }
+                                    className="cursor-pointer transition duration-300 bg-orange-500 hover:bg-orange-900 text-white font-bold py-2 px-4 rounded mt-5"
+                                >
+                                    Exportar Evento PDF
+                                </button>
                                 <Link
                                     href={{
                                         pathname: `/eventos/atualizar-evento/${id}`,
@@ -244,8 +299,7 @@ export default function EventoDetalhes() {
                         </div>
                         <div className="w-full h-[2px] bg-gray-200"></div>
                         <h2 className="text-xl opacity-70">
-                            {evento?.data_evento} |{' '}
-                            {evento?.lista_participantes?.length ?? 0}/
+                            {evento?.data_evento} | {totalParticipantes}/
                             {evento?.capacidade_evento}
                         </h2>
                         <section className="flex flex-col gap-4 items-start justify-center mt-6">
@@ -311,6 +365,60 @@ export default function EventoDetalhes() {
                 }
                 show={showDeleteAtividade}
             />
+            {showExportarEvento && (
+                <main className="fixed flex items-center justify-center h-screen w-screen bg-black/50">
+                    <section className="w-fit flex flex-col gap-6 items-center justify-center *:text-center bg-white rounded-2xl p-6">
+                        <div
+                            className="self-end cursor-pointer text-4xl"
+                            onClick={() =>
+                                setShowExportarEvento((prev) => !prev)
+                            }
+                        >
+                            X
+                        </div>
+                        <h1 className="text-2xl self-start">
+                            Escolha a linguagem:
+                        </h1>
+                        <div className="flex items-center justify-center gap-4 *:cursor-pointer *:transition *:duration-300 *:border *:border-blue-500 *:hover:border-blue-900 *:text-black *:font-bold *:py-2 *:px-4 *:rounded ">
+                            <button
+                                onClick={() => setExportarLingua('pt')}
+                                className={`${
+                                    exportarLingua == 'pt' &&
+                                    'border-3! border-green-500!'
+                                }`}
+                            >
+                                🇵🇹 Português
+                            </button>
+                            <button
+                                onClick={() => setExportarLingua('en')}
+                                className={`${
+                                    exportarLingua == 'en' &&
+                                    'border-3! border-green-500!'
+                                }`}
+                            >
+                                🇬🇧 Inglês
+                            </button>
+
+                            <button
+                                onClick={() => setExportarLingua('it')}
+                                className={`${
+                                    exportarLingua == 'it' &&
+                                    'border-3! border-green-500!'
+                                }`}
+                            >
+                                🇮🇹 Italiano
+                            </button>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleExportEvento}
+                            className="cursor-pointer transition duration-300 border bg-blue-500 hover:bg-blue-900 text-white font-bold py-2 px-4 rounded self-end"
+                        >
+                            Exportar
+                        </button>
+                    </section>
+                </main>
+            )}
         </main>
     );
 }

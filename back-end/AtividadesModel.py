@@ -69,7 +69,7 @@ class AtividadesModel:
         return self.restricoes
 
     def get_lista_participantes(self):
-        return self.participantes
+        return self.lista_participantes
 
     def get_lista_entrevenientes(self):
         return self.lista_entrevenientes
