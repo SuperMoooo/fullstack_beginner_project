@@ -291,7 +291,7 @@ def adicionar_participante(eventoId, atividadeId):
             return jsonify({"Erro" : "Utilizador não encontrado"}), 400
         if user.get_tipo() != "Participante":
             return jsonify({"Erro" : "Utilizador não é participante"}), 400
-
+        # VERIFICAR RESTRIÇÕES DA ATIVIDADE
         sucess = EventDatabase.atualizar_atividade_listas_por_campo(atividadeId, user , collEvents, "lista_participantes")
         # ADICIONAR CODIGOS DOS EVENTOS PARA VALIDAR AO USER
         if sucess:
