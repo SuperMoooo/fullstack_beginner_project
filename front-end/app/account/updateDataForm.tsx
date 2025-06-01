@@ -64,11 +64,11 @@ export default function UpdateDataForm({
                 error={error.toLocaleLowerCase().includes('email')}
             />
             <TitleInput
-                readOnly={true}
                 setValor={setDataNascimento}
                 valor={data_nascimento}
                 titulo="Data de nascimento"
                 error={error.toLocaleLowerCase().includes('data')}
+                inputType="date"
             />
             <TitleInput
                 setValor={setPassword}

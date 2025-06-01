@@ -336,6 +336,7 @@ export default function EventoDetalhes() {
             } else {
                 const errorData = await response.json();
                 setError(errorData['Erro'] ?? 'Erro desconhecido');
+                setShowAddParticipante(false);
             }
         } catch (error: any) {
             if (error.message.includes('NetworkError')) {

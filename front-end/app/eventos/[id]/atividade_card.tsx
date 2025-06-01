@@ -1,4 +1,4 @@
-import { Atividade, Entreveniente, Participante, Tipo } from '@/app/util/types';
+import { Atividade, Tipo } from '@/app/util/types';
 import React from 'react';
 
 export default function AtividadeCard({
@@ -44,7 +44,7 @@ export default function AtividadeCard({
             </h2>
             <div className="w-full h-[1px] bg-gray-300"></div>
             <h2>{atividade.restricoes}</h2>
-            {atividade.lista_entrevenientes!.length > 0 && (
+            {(atividade.lista_entrevenientes?.length ?? 0) > 0 && (
                 <>
                     <div className="w-full h-[1px] bg-gray-300"></div>
                     <h2>Entrevenientes:</h2>
@@ -104,13 +104,21 @@ export default function AtividadeCard({
 
             {tipo === 'Participante' &&
                 (estaNaListaParticipantes ? (
-                    <button
-                        type="button"
-                        onClick={revomerParticipante}
-                        className="cursor-pointer transition duration-300 bg-red-500 hover:bg-red-900 text-white font-bold py-2 px-4 rounded mt-5"
-                    >
-                        Deixar de Inscrever
-                    </button>
+                    <>
+                        <button
+                            type="button"
+                            onClick={revomerParticipante}
+                            className="cursor-pointer transition duration-300 bg-red-500 hover:bg-red-900 text-white font-bold py-2 px-4 rounded mt-5"
+                        >
+                            Deixar de Inscrever
+                        </button>
+                        <h1>Código para entrada:</h1>
+                        <h3>
+                            {atividade.lista_participantes?.filter(
+                                (participante) => participante.nome == userNome
+                            )[0].nif + atividade.identificador}
+                        </h3>
+                    </>
                 ) : (
                     <button
                         type="button"

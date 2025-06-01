@@ -1,3 +1,5 @@
+import re
+
 
 class EventDatabase:
 
@@ -58,6 +60,27 @@ class EventDatabase:
 
 
     # ATIVIDADES RELATED
+
+    @staticmethod
+    def get_atividade(identificador : str, collection):
+        try:
+            # RETORNA EVENTO COM AQUELA ATIVIDADE
+            evento = collection.find_one({"lista_atividades.identificador": identificador})
+            if evento is None:
+                raise Exception("Atividade não encontrada")
+
+            for atividade in evento["lista_atividades"]:
+                # PROCURAR ATIVIDADE CORRETA
+                if atividade["identificador"] == identificador:
+                    restricao_idade = re.findall(r"\d+", atividade["restricoes"])
+                    return restricao_idade
+
+            return 0
+        except Exception as e:
+            print(e)
+            raise
+
+
     @staticmethod
     def delete_atividade(identificador : str, collection):
         try:

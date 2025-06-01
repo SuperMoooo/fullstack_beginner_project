@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 from pymongo import MongoClient
@@ -145,9 +147,9 @@ def atualizar_user(nome):
         if data["tipo"] == "Admin":
             updatedUserData =  AdminModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"])
         elif data["tipo"] == "Entreveniente":
-            updatedUserData = EntrevenienteModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"] , [])
+            updatedUserData = EntrevenienteModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"] )
         elif data["tipo"] == "Participante":
-            updatedUserData =  ParticipanteModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"], "" )
+            updatedUserData =  ParticipanteModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"], [] )
 
         UtilizadorDatabase.atualizar_user(updatedUserData, collUsers, nome)
         return jsonify({"Sucesso": "User atualizado com sucesso"}), 200
@@ -292,9 +294,18 @@ def adicionar_participante(eventoId, atividadeId):
         if user.get_tipo() != "Participante":
             return jsonify({"Erro" : "Utilizador não é participante"}), 400
         # VERIFICAR RESTRIÇÕES DA ATIVIDADE
+
+        restricao = EventDatabase.get_atividade(atividadeId, collEvents)
+
+        idade_user = datetime.today().year - int(user.get_data_nascimento().split("/")[2])
+
+        if int(restricao[0]) > idade_user:
+            return jsonify({"Erro" : "Utilizador não tem idade suficiente para entrar na atividade"}), 400
         sucess = EventDatabase.atualizar_atividade_listas_por_campo(atividadeId, user , collEvents, "lista_participantes")
-        # ADICIONAR CODIGOS DOS EVENTOS PARA VALIDAR AO USER
-        if sucess:
+
+        updated = user.adicionar_codigo(collUsers, atividadeId)
+
+        if sucess and updated:
             return jsonify({"Sucesso" : "Participante adicionado"}), 200
         return jsonify({"Erro" : "Não foi possível adicionar o participante"}), 400
     except Exception as e:
@@ -316,7 +327,7 @@ def adicionar_entreveniente(eventoId, atividadeId):
             return jsonify({"Erro" : "Utilizador não é entreveniente"}), 400
 
         sucess = EventDatabase.atualizar_atividade_listas_por_campo(atividadeId, user , collEvents, "lista_entrevenientes")
-        # ADICIONAR EVENTOS IDS AO USER
+
         if sucess:
             return jsonify({"Sucesso" : "Entreveniente adicionado"}), 200
         return jsonify({"Erro" : "Não foi possível adicionar o entreveniente"}), 400

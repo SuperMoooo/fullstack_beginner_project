@@ -73,6 +73,12 @@ export default function Account() {
             setLoading(true);
             const token = localStorage.getItem('token');
             const user_nome = localStorage.getItem('user_nome');
+
+            let day = data_nascimento.split('-')[2];
+            let month = data_nascimento.split('-')[1].split('-')[0];
+            let year = data_nascimento.split('-')[0];
+            const nascimento_date = `${day}/${month}/${year}`;
+
             const response = await fetch(
                 `http://127.0.0.1:5000/atualizar-user/${user_nome}`,
                 {
@@ -84,7 +90,7 @@ export default function Account() {
                     body: JSON.stringify({
                         nome: nome,
                         email: email,
-                        data_nascimento: data_nascimento,
+                        data_nascimento: nascimento_date,
                         password: password,
                         tipo: tipo,
                         nif: nif,

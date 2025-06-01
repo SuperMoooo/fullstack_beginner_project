@@ -15,9 +15,9 @@ class UtilizadorDatabase:
             if result["tipo"] == "Admin":
                 return AdminModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"])
             elif result["tipo"] == "Entreveniente":
-                return EntrevenienteModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"] , [])
+                return EntrevenienteModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"])
             elif result["tipo"] == "Participante":
-                return ParticipanteModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"], "" )
+                return ParticipanteModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"], [] )
         return None
 
     # VERIFICAR LOGIN

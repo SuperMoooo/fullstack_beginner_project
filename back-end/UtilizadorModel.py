@@ -53,11 +53,19 @@ class UtilizadorModel:
     def get_data_nascimento(self):
         return self.data_nascimento
 
+    def get_sexo(self):
+        return self.sexo
+
+    def get_nif(self):
+        return self.nif
+
     def get_password(self):
         return self.password
 
     def get_tipo(self):
         return self.tipo
+
+
 
     # SETS
 
@@ -75,6 +83,16 @@ class UtilizadorModel:
         if not self.verificar_data(data_nascimento):
             raise Exception('Data nascimento invalida!')
         self.data_nascimento = data_nascimento
+
+    def set_sexo(self, sexo : str):
+        if not self.verificar_sexo(sexo):
+            raise Exception('Sexo invalido!')
+        self.sexo = sexo
+
+    def set_nif(self, nif : str):
+        if not self.verificar_nif(nif):
+            raise Exception('Nif invalido!')
+        self.nif = nif
 
     def set_password(self, password : str):
         if not self.verificar_password(password):

@@ -5,28 +5,28 @@ from UtilizadorInterface import UtilizadorInterface
 class ParticipanteModel(UtilizadorModel, UtilizadorInterface):
     # VARS
 
-    codigo : str
+    codigos : list[str]
 
     # CONSTRUTOR
 
-    def __init__(self, nome : str, email : str, data_nascimento : datetime, sexo : str, nif : str, password : str, tipo : str, codigo : str):
+    def __init__(self, nome : str, email : str, data_nascimento : datetime, sexo : str, nif : str, password : str, tipo : str, codigos : list[str]):
 
         super().__init__(nome, email, data_nascimento, sexo, nif, password, tipo)
 
-        self.codigo = codigo
+        self.codigos = codigos
 
     # ENCAPSULAMENTO
 
     # GETS
 
-    def get_codigo(self):
-        return self.codigo
+    def get_codigos(self):
+        return self.codigos
 
     # SETS
 
 
-    def set_codigo(self, codigo : str):
-        self.codigo = codigo
+    def set_codigos(self, codigos : list[str]):
+        self.codigos = codigos
 
     # FIM ENCAPSULAMENTO
 
@@ -37,6 +37,15 @@ class ParticipanteModel(UtilizadorModel, UtilizadorInterface):
         try:
             collection.insert_one(self.__dict__)
             return True
+        except Exception as e:
+            print(e)
+            raise
+
+
+    def adicionar_codigo(self, collection, atividade_id):
+        try:
+            updated = collection.update_one({"nome": self.get_nome()}, {"$push": {"codigos": self.get_nif() +  atividade_id}})
+            return updated.modified_count
         except Exception as e:
             print(e)
             raise

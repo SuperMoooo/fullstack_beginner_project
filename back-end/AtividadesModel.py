@@ -14,7 +14,7 @@ class AtividadesModel:
     hora_atividade : str
     descricao_atividade : str
     localidade_atividade : str
-    restricoes : list[str]
+    restricoes : str
     lista_participantes : list[ParticipanteModel]
     lista_entrevenientes : list[EntrevenienteModel]
     comentarios : list[str]
@@ -22,7 +22,7 @@ class AtividadesModel:
 
     # CONSTRUTOR
 
-    def __init__(self, identificador : str, data_atividade : datetime, hora_atividade : str, descricao_atividade : str, localidade_atividade : str, restricoes : list[str], lista_participantes: list[ParticipanteModel], lista_entrevenientes : list[EntrevenienteModel],  comentarios : list[str]):
+    def __init__(self, identificador : str, data_atividade : datetime, hora_atividade : str, descricao_atividade : str, localidade_atividade : str, restricoes : str, lista_participantes: list[ParticipanteModel], lista_entrevenientes : list[EntrevenienteModel],  comentarios : list[str]):
         self.identificador = identificador
         if not AtividadesModel.validar_data(data_atividade):
             raise Exception("A data da atividade está num formato inválido")
@@ -98,7 +98,7 @@ class AtividadesModel:
             raise Exception("A localidade da atividade não pode ser vazia")
         self.localidade_atividade = localidade_atividade
 
-    def set_restricoes(self, restricoes : list[str]):
+    def set_restricoes(self, restricoes : str):
         self.restricoes = restricoes
 
     def set_lista_participantes(self, lista_participantes : list[ParticipanteModel]):
