@@ -6,3 +6,5 @@ class UtilizadorInterface(ABC):
     def criar_user(self, collection) -> bool:
         pass
 
+
+

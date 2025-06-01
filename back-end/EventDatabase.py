@@ -83,3 +83,37 @@ class EventDatabase:
             raise
 
 
+    @staticmethod
+    def atualizar_atividade_listas_por_campo(identificador: str, user, collection, campo):
+        try:
+            res = collection.update_one(
+                {"lista_atividades.identificador": identificador},
+                {
+                    "$push": {f"lista_atividades.$[elem].{campo}": user.__dict__}
+                },
+                array_filters=[{"elem.identificador": identificador}]
+            )
+            return res.modified_count
+        except Exception as e:
+            print(e)
+            raise
+
+    @staticmethod
+    def remover_user_atividades(identificador: str, user, collection, campo):
+        try:
+            res = collection.update_one(
+                {"lista_atividades.identificador": identificador},
+                {
+                    "$pull": {
+                        f"lista_atividades.$[elem].{campo}": {"nome": user.get_nome()}
+                    }
+                },
+                array_filters=[{"elem.identificador": identificador}]
+            )
+            return res.modified_count
+        except Exception as e:
+            print(e)
+            raise
+
+
+

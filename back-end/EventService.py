@@ -149,7 +149,7 @@ def atualizar_user(nome):
         elif data["tipo"] == "Participante":
             updatedUserData =  ParticipanteModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"], "" )
 
-        user.atualizar_user(updatedUserData, collUsers)
+        UtilizadorDatabase.atualizar_user(updatedUserData, collUsers, nome)
         return jsonify({"Sucesso": "User atualizado com sucesso"}), 200
     except Exception as e:
         print(e)
@@ -260,10 +260,12 @@ def importar_evento():
 @app.route("/exportar-evento-pdf/<int:id>/<string:lingua>", methods=['GET'])
 def exportar_evento_pdf(id, lingua):
     try:
-        if not id or not lingua:
+        if not id:
             return jsonify({"Erro" : "Evento não encontrado"}), 400
-        evento = EventDatabase.get_evento(id, collEvents)
+        if not lingua:
+            return jsonify({"Erro" : "Linguagem não selecionada"}), 400
 
+        evento = EventDatabase.get_evento(id, collEvents)
 
         if not evento:
             return jsonify({"Erro" : "Evento não encontrado"}), 400
@@ -276,6 +278,98 @@ def exportar_evento_pdf(id, lingua):
         print(e)
         return jsonify({"Erro" : str(e)}), 400
 
+# ADICIONAR PARTICIPANTE
+@app.route("/evento/<int:eventoId>/atividade/<string:atividadeId>/adicionar-participante", methods=['PUT'])
+def adicionar_participante(eventoId, atividadeId):
+    try:
+        data = request.get_json()
+        if not eventoId or not atividadeId:
+            return jsonify({"Erro" : "Evento ou atividade não encontrado"}), 400
+
+        user = UtilizadorDatabase.get_user_by_nome(data["nome_participante"],collUsers)
+        if not user :
+            return jsonify({"Erro" : "Utilizador não encontrado"}), 400
+        if user.get_tipo() != "Participante":
+            return jsonify({"Erro" : "Utilizador não é participante"}), 400
+
+        sucess = EventDatabase.atualizar_atividade_listas_por_campo(atividadeId, user , collEvents, "lista_participantes")
+        # ADICIONAR CODIGOS DOS EVENTOS PARA VALIDAR AO USER
+        if sucess:
+            return jsonify({"Sucesso" : "Participante adicionado"}), 200
+        return jsonify({"Erro" : "Não foi possível adicionar o participante"}), 400
+    except Exception as e:
+        print(e)
+        return jsonify({"Erro" : str(e)}), 400
+
+# ADICIONAR ENTREVENIENTE
+@app.route("/evento/<int:eventoId>/atividade/<string:atividadeId>/adicionar-entreveniente", methods=['PUT'])
+def adicionar_entreveniente(eventoId, atividadeId):
+    try:
+        data = request.get_json()
+        if not eventoId or not atividadeId:
+            return jsonify({"Erro" : "Evento ou atividade não encontrado"}), 400
+
+        user = UtilizadorDatabase.get_user_by_nome(data["nome_entreveniente"],collUsers)
+        if not user :
+            return jsonify({"Erro" : "Utilizador não encontrado"}), 400
+        if user.get_tipo() != "Entreveniente":
+            return jsonify({"Erro" : "Utilizador não é entreveniente"}), 400
+
+        sucess = EventDatabase.atualizar_atividade_listas_por_campo(atividadeId, user , collEvents, "lista_entrevenientes")
+        # ADICIONAR EVENTOS IDS AO USER
+        if sucess:
+            return jsonify({"Sucesso" : "Entreveniente adicionado"}), 200
+        return jsonify({"Erro" : "Não foi possível adicionar o entreveniente"}), 400
+    except Exception as e:
+        print(e)
+        return jsonify({"Erro" : str(e)}), 400
+
+
+# REMOVER PARTICIPANTE
+@app.route("/evento/<int:eventoId>/atividade/<string:atividadeId>/remover-participante", methods=['PUT'])
+def remover_participante(eventoId, atividadeId):
+    try:
+        data = request.get_json()
+        if not eventoId or not atividadeId:
+            return jsonify({"Erro" : "Evento ou atividade não encontrado"}), 400
+
+        user = UtilizadorDatabase.get_user_by_nome(data["nome_participante"],collUsers)
+        if not user :
+            return jsonify({"Erro" : "Utilizador não encontrado"}), 400
+        if user.get_tipo() != "Participante":
+            return jsonify({"Erro" : "Utilizador não é participante"}), 400
+
+        sucess = EventDatabase.remover_user_atividades(atividadeId, user , collEvents, "lista_participantes")
+        # ADICIONAR CODIGOS DOS EVENTOS PARA VALIDAR AO USER
+        if sucess:
+            return jsonify({"Sucesso" : "Participante removido"}), 200
+        return jsonify({"Erro" : "Não foi possível remover o participante"}), 400
+    except Exception as e:
+        print(e)
+        return jsonify({"Erro" : str(e)}), 400
+
+# REMOVER Entreveniente
+@app.route("/evento/<int:eventoId>/atividade/<string:atividadeId>/remover-entreveniente", methods=['PUT'])
+def remover_entreveniente(eventoId, atividadeId):
+    try:
+        data = request.get_json()
+        if not eventoId or not atividadeId:
+            return jsonify({"Erro" : "Evento ou atividade não encontrado"}), 400
+
+        user = UtilizadorDatabase.get_user_by_nome(data["nome_entreveniente"],collUsers)
+        if not user :
+            return jsonify({"Erro" : "Utilizador não encontrado"}), 400
+        if user.get_tipo() != "Entreveniente":
+            return jsonify({"Erro" : "Utilizador não é entreveniente"}), 400
+
+        sucess = EventDatabase.remover_user_atividades(atividadeId, user , collEvents, "lista_entrevenientes")
+        # ADICIONAR EVENTOS IDS AO USER
+        if sucess:
+            return jsonify({"Sucesso" : "Entreveniente removido"}), 200
+        return jsonify({"Erro" : "Não foi possível remover o entreveniente"}), 400
+    except Exception as e:
+        print(e)
+        return jsonify({"Erro" : str(e)}), 400
 
 
 # ::::::::::::: FIM EVENTO ::::::::::::::::

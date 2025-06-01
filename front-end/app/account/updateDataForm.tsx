@@ -47,6 +47,7 @@ export default function UpdateDataForm({
                 title="Tipo Utilizador"
                 setValor={setTipo}
                 valores={['Admin', 'Entreveniente', 'Participante']}
+                initialValor={tipo}
             />
 
             <TitleInput
@@ -80,6 +81,7 @@ export default function UpdateDataForm({
                 title="Sexo"
                 setValor={setSexo}
                 valores={['Homem', 'Mulher', 'Outro', 'Prefiro não dizer']}
+                initialValor={sexo}
             />
 
             <TitleInput

@@ -1,7 +1,7 @@
 'use client';
 import Loading from '@/app/components/loading';
 import Navbar from '@/app/components/Navbar';
-import { Atividade, Evento, restricoesPossiveis } from '@/app/util/types';
+import { Atividade, Evento, restricoesPossiveis, Tipo } from '@/app/util/types';
 import { useParams } from 'next/navigation';
 import React, { use, useEffect, useState } from 'react';
 import AtividadeCard from './atividade_card';
@@ -13,6 +13,9 @@ export default function EventoDetalhes() {
     const params = useParams();
     const id = params.id;
 
+    const [tipo, setTipo] = useState<Tipo>('Entreveniente');
+    const [userNome, setUserNome] = useState<string>('');
+
     const [evento, setEvento] = useState<Evento>();
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
@@ -23,6 +26,15 @@ export default function EventoDetalhes() {
     const [showDeleteAtividade, setShowDeleteAtividade] =
         useState<boolean>(false);
     const [showExportarEvento, setShowExportarEvento] =
+        useState<boolean>(false);
+    const [showAddEntreveniente, setShowAddEntreveniente] =
+        useState<boolean>(false);
+
+    const [showAddParticipante, setShowAddParticipante] =
+        useState<boolean>(false);
+    const [showRemoveParticipante, setShowRemoveParticipante] =
+        useState<boolean>(false);
+    const [showRemoveEntreveniente, setShowRemoveEntreveniente] =
         useState<boolean>(false);
 
     // ATIVIDADES
@@ -38,6 +50,10 @@ export default function EventoDetalhes() {
     const [totalParticipantes, setTotalParticipantes] = useState<number>(0);
 
     useEffect(() => {
+        const auxTipo = localStorage.getItem('tipo');
+        setTipo(auxTipo ? (auxTipo as Tipo) : 'Entreveniente');
+        const user_name = localStorage.getItem('user_nome');
+        setUserNome(user_name ? user_name : '');
         getEvento();
     }, []);
 
@@ -258,6 +274,153 @@ export default function EventoDetalhes() {
             setLoading(false);
         }
     };
+
+    const handleAddEntreveniente = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+
+            const response = await fetch(
+                `http://127.0.0.1:5000/evento/${id}/atividade/${atividadeIdentificador}/adicionar-entreveniente`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nome_entreveniente: userNome,
+                    }),
+                }
+            );
+            if (response.ok) {
+                setShowAddEntreveniente(false);
+                getEvento();
+                setError('');
+            } else {
+                const errorData = await response.json();
+                setError(errorData['Erro'] ?? 'Erro desconhecido');
+            }
+        } catch (error: any) {
+            if (error.message.includes('NetworkError')) {
+                setError('Servidor Offline');
+            } else {
+                setError(error.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAddParticipante = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            const response = await fetch(
+                `http://127.0.0.1:5000/evento/${id}/atividade/${atividadeIdentificador}/adicionar-participante`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nome_participante: userNome,
+                    }),
+                }
+            );
+            if (response.ok) {
+                setError('');
+                getEvento();
+                setShowAddParticipante(false);
+            } else {
+                const errorData = await response.json();
+                setError(errorData['Erro'] ?? 'Erro desconhecido');
+            }
+        } catch (error: any) {
+            if (error.message.includes('NetworkError')) {
+                setError('Servidor Offline');
+            } else {
+                setError(error.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRemoveEntreveniente = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+
+            const response = await fetch(
+                `http://127.0.0.1:5000/evento/${id}/atividade/${atividadeIdentificador}/remover-entreveniente`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nome_entreveniente: userNome,
+                    }),
+                }
+            );
+            if (response.ok) {
+                setShowRemoveEntreveniente(false);
+                getEvento();
+                setError('');
+            } else {
+                const errorData = await response.json();
+                setError(errorData['Erro'] ?? 'Erro desconhecido');
+            }
+        } catch (error: any) {
+            if (error.message.includes('NetworkError')) {
+                setError('Servidor Offline');
+            } else {
+                setError(error.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRemoveParticipante = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            const response = await fetch(
+                `http://127.0.0.1:5000/evento/${id}/atividade/${atividadeIdentificador}/remover-participante`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nome_participante: userNome,
+                    }),
+                }
+            );
+            if (response.ok) {
+                setError('');
+                getEvento();
+                setShowRemoveParticipante(false);
+            } else {
+                const errorData = await response.json();
+                setError(errorData['Erro'] ?? 'Erro desconhecido');
+            }
+        } catch (error: any) {
+            if (error.message.includes('NetworkError')) {
+                setError('Servidor Offline');
+            } else {
+                setError(error.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <main className="grid grid-rows-[auto_1fr] min-h-[100dvh]">
             <Navbar goBack={true} />
@@ -270,32 +433,36 @@ export default function EventoDetalhes() {
                             <h1 className="text-4xl font-bold">
                                 {evento?.nome_evento}
                             </h1>
-                            <div className="flex items-center justify-center gap-4">
-                                <button
-                                    onClick={() =>
-                                        setShowExportarEvento((prev) => !prev)
-                                    }
-                                    className="cursor-pointer transition duration-300 bg-orange-500 hover:bg-orange-900 text-white font-bold py-2 px-4 rounded mt-5"
-                                >
-                                    Exportar Evento PDF
-                                </button>
-                                <Link
-                                    href={{
-                                        pathname: `/eventos/atualizar-evento/${id}`,
-                                    }}
-                                    className="cursor-pointer transition duration-300 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-5"
-                                >
-                                    Editar Evento
-                                </Link>
-                                <button
-                                    onClick={() =>
-                                        setShowDeleteEvento((prev) => !prev)
-                                    }
-                                    className="cursor-pointer transition duration-300 bg-red-500 hover:bg-red-900 text-white font-bold py-2 px-4 rounded mt-5"
-                                >
-                                    Eliminar Evento
-                                </button>
-                            </div>
+                            {tipo == 'Admin' && (
+                                <div className="flex items-center justify-center gap-4">
+                                    <button
+                                        onClick={() =>
+                                            setShowExportarEvento(
+                                                (prev) => !prev
+                                            )
+                                        }
+                                        className="cursor-pointer transition duration-300 bg-orange-500 hover:bg-orange-900 text-white font-bold py-2 px-4 rounded mt-5"
+                                    >
+                                        Exportar Evento PDF
+                                    </button>
+                                    <Link
+                                        href={{
+                                            pathname: `/eventos/atualizar-evento/${id}`,
+                                        }}
+                                        className="cursor-pointer transition duration-300 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-5"
+                                    >
+                                        Editar Evento
+                                    </Link>
+                                    <button
+                                        onClick={() =>
+                                            setShowDeleteEvento((prev) => !prev)
+                                        }
+                                        className="cursor-pointer transition duration-300 bg-red-500 hover:bg-red-900 text-white font-bold py-2 px-4 rounded mt-5"
+                                    >
+                                        Eliminar Evento
+                                    </button>
+                                </div>
+                            )}
                         </div>
                         <div className="w-full h-[2px] bg-gray-200"></div>
                         <h2 className="text-xl opacity-70">
@@ -304,7 +471,7 @@ export default function EventoDetalhes() {
                         </h2>
                         <section className="flex flex-col gap-4 items-start justify-center mt-6">
                             <h1 className="text-2xl">Atividades</h1>
-                            <aside className="flex items-center justify-start gap-2">
+                            <aside className="flex items-start justify-start gap-2">
                                 {evento?.lista_atividades.map(
                                     (atividade, index) => (
                                         <AtividadeCard
@@ -312,6 +479,7 @@ export default function EventoDetalhes() {
                                             atividade={atividade}
                                             editavel={true}
                                             eliminavel={true}
+                                            userNome={userNome}
                                             onEdit={() =>
                                                 handleEditAtividade(atividade)
                                             }
@@ -321,11 +489,49 @@ export default function EventoDetalhes() {
                                                 );
                                                 setShowDeleteAtividade(true);
                                             }}
+                                            tipo={tipo}
+                                            addEntreveniente={() => {
+                                                setAtividadeIdentificador(
+                                                    atividade.identificador
+                                                );
+
+                                                setShowAddEntreveniente(
+                                                    (prev) => !prev
+                                                );
+                                            }}
+                                            addParticipante={() => {
+                                                setAtividadeIdentificador(
+                                                    atividade.identificador
+                                                );
+
+                                                setShowAddParticipante(
+                                                    (prev) => !prev
+                                                );
+                                            }}
+                                            revomerEntreveniente={() => {
+                                                setAtividadeIdentificador(
+                                                    atividade.identificador
+                                                );
+
+                                                setShowRemoveEntreveniente(
+                                                    (prev) => !prev
+                                                );
+                                            }}
+                                            revomerParticipante={() => {
+                                                setAtividadeIdentificador(
+                                                    atividade.identificador
+                                                );
+
+                                                setShowRemoveParticipante(
+                                                    (prev) => !prev
+                                                );
+                                            }}
                                         />
                                     )
                                 )}
                             </aside>
                         </section>
+                        {error && <p className="text-red-500">{error}</p>}
                     </article>
                 )}
                 {add_atividade && (
@@ -364,6 +570,42 @@ export default function EventoDetalhes() {
                     setShowDeleteAtividade((prev: boolean) => !prev)
                 }
                 show={showDeleteAtividade}
+            />
+            <QuestionModal
+                title="Inscrever na Atividade"
+                message="Tem certeza que deseja inscrever-se nesta atividade?"
+                onConfirm={handleAddParticipante}
+                onCancel={() =>
+                    setShowAddParticipante((prev: boolean) => !prev)
+                }
+                show={showAddParticipante}
+            />
+            <QuestionModal
+                title="Participar na Atividade"
+                message="Tem certeza que deseja ser participante nesta atividade?"
+                onConfirm={handleAddEntreveniente}
+                onCancel={() =>
+                    setShowRemoveEntreveniente((prev: boolean) => !prev)
+                }
+                show={showAddEntreveniente}
+            />
+            <QuestionModal
+                title="Remover Inscrição"
+                message="Tem certeza que deseja remover a sua inscrição nesta atividade?"
+                onConfirm={handleRemoveParticipante}
+                onCancel={() =>
+                    setShowRemoveParticipante((prev: boolean) => !prev)
+                }
+                show={showRemoveParticipante}
+            />
+            <QuestionModal
+                title="Deixar Atividade"
+                message="Tem certeza que deseja deixar de ser participante nesta atividade?"
+                onConfirm={handleRemoveEntreveniente}
+                onCancel={() =>
+                    setShowRemoveEntreveniente((prev: boolean) => !prev)
+                }
+                show={showRemoveEntreveniente}
             />
             {showExportarEvento && (
                 <main className="fixed flex items-center justify-center h-screen w-screen bg-black/50">

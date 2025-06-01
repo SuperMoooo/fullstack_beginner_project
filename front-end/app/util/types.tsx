@@ -16,27 +16,27 @@ export type Atividade = {
     descricao_atividade: string;
     localidade_atividade: string;
     restricoes: string;
-    entrevenientes: Entreveniente[] | undefined;
+    lista_entrevenientes: Entreveniente[] | undefined;
     lista_participantes: Participante[] | undefined;
     comentarios: string[] | undefined;
 };
 
 export type Entreveniente = {
-    nome_participante: string;
-    email_participante: string;
-    data_nascimento_participante: Date;
-    tipo_participante: Tipo;
+    nome: string;
+    email: string;
+    data_nascimento: Date;
+    tipo: Tipo;
 };
 
 export type Participante = {
-    nome_utilizador: string;
-    email_utilizador: string;
-    data_nascimento_utilizador: string;
+    nome: string;
+    email: string;
+    data_nascimento: string;
     sexo: Sexo;
-    nif_utilizador: string;
-    password_utilizador: string;
-    tipo_utilizador: Tipo;
-    codigo_utilizador: string | undefined;
+    nif: string;
+    password: string;
+    tipo: Tipo;
+    codigo: string | undefined;
 };
 
 export type Evento = {
