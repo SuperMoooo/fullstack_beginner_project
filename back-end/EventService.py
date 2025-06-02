@@ -3,6 +3,7 @@ from datetime import datetime
 from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 from pymongo import MongoClient
+import speech_recognition as sr
 
 from EntrevenienteModel import EntrevenienteModel
 from ParticipanteModel import ParticipanteModel
@@ -242,7 +243,7 @@ def importar_evento():
         file = request.files['csvFile']
         if not file:
             return jsonify({"Erro" : "Ficheiro inválio"}), 400
-        if file.content_type != "application/vnd.ms-excel":
+        if file.content_type != "text/csv":
             return jsonify({"Erro" : "Ficheiro não é csv"}), 400
         file.save("csv_file_evento.csv")
         result = Hooks.get_csv_data("./csv_file_evento.csv")
@@ -299,7 +300,7 @@ def adicionar_participante(eventoId, atividadeId):
 
         idade_user = datetime.today().year - int(user.get_data_nascimento().split("/")[2])
 
-        if int(restricao[0]) > idade_user:
+        if restricao and int(restricao[0]) > idade_user:
             return jsonify({"Erro" : "Utilizador não tem idade suficiente para entrar na atividade"}), 400
         sucess = EventDatabase.atualizar_atividade_listas_por_campo(atividadeId, user , collEvents, "lista_participantes")
 
@@ -431,6 +432,20 @@ def eliminar_atividade(identificador):
 
     except Exception as e:
         return jsonify({"Erro" : str(e)}), 400
+
+
+@app.route("/ouvir", methods=["GET"])
+def ouvir():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        audio = recognizer.listen(source)
+        try:
+            texto = recognizer.recognize_google(audio, language='pt-PT')
+            return jsonify({'texto': texto}) , 200
+        except sr.UnknownValueError:
+            return jsonify({'texto': 'Não entendi.'}), 404
+        except sr.RequestError:
+            return jsonify({'texto': 'Erro na API.'}) , 404
 
 if __name__ == '__main__':
     app.run(debug=True)

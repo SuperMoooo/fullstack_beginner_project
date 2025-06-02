@@ -5,7 +5,6 @@ import Loading from '../components/loading';
 import Link from 'next/link';
 import { Evento, Tipo } from '../util/types';
 import EventCard from './event_card';
-import TitleInput from '../components/title_input';
 import TitleInputFile from '../components/title_input_file';
 
 export default function Eventos() {
@@ -65,7 +64,7 @@ export default function Eventos() {
                 setImportError('Nenhum arquivo selecionado');
                 return;
             }
-            if (csvFile.type !== 'application/vnd.ms-excel') {
+            if (csvFile.type !== 'text/csv') {
                 setImportError('Arquivo inválido');
                 return;
             }

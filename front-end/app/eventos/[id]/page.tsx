@@ -8,6 +8,7 @@ import AtividadeCard from './atividade_card';
 import QuestionModal from '@/app/components/question_modal';
 import AtividadeForm from '@/app/components/atividade_form';
 import Link from 'next/link';
+import ValidarParticipanteModal from '@/app/components/validar_participante_modal';
 
 export default function EventoDetalhes() {
     const params = useParams();
@@ -36,6 +37,14 @@ export default function EventoDetalhes() {
         useState<boolean>(false);
     const [showRemoveEntreveniente, setShowRemoveEntreveniente] =
         useState<boolean>(false);
+    const [showValidarParticipante, setShowValidarParticipante] =
+        useState<boolean>(false);
+
+    // VALIDAR PARTICIPANTE
+    const [validarError, setValidarError] = useState<string>('');
+    const [nif, setNif] = useState<string>('');
+    const [codigo, setCodigo] = useState<string>('');
+    const [micListening, setMicListening] = useState<string>('');
 
     // ATIVIDADES
     const [add_atividade, setAddAtividade] = useState<boolean>(false);
@@ -422,6 +431,54 @@ export default function EventoDetalhes() {
         }
     };
 
+    const askMicPermission = async () => {
+        try {
+            await navigator.mediaDevices.getUserMedia({
+                audio: true,
+            });
+
+            return true;
+        } catch (err) {
+            return false;
+        }
+    };
+
+    const handleCaptureAudio = async (setValor: any, valorAouvir: string) => {
+        try {
+            const permission = await askMicPermission();
+            if (!permission) {
+                setValidarError('Permissão negada para acessar o microfone');
+                return;
+            }
+            const token = localStorage.getItem('token');
+            setMicListening(valorAouvir);
+            const response = await fetch(`http://127.0.0.1:5000/ouvir`, {
+                method: 'GET',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setValidarError('');
+                getEvento();
+                setValor(data['texto']);
+                setMicListening('');
+            } else {
+                const errorData = await response.json();
+                setError(errorData['Erro'] ?? 'Erro desconhecido');
+            }
+        } catch (error: any) {
+            if (error.message.includes('NetworkError')) {
+                setError('Servidor Offline');
+            } else {
+                setError(error.message);
+            }
+        }
+    };
+    const handleValidarParticipante = async () => {};
+
     return (
         <main className="grid grid-rows-[auto_1fr] min-h-[100dvh]">
             <Navbar goBack={true} />
@@ -527,6 +584,14 @@ export default function EventoDetalhes() {
                                                     (prev) => !prev
                                                 );
                                             }}
+                                            validarParticipante={() => {
+                                                setAtividadeIdentificador(
+                                                    atividade.identificador
+                                                );
+                                                setShowValidarParticipante(
+                                                    (prev) => !prev
+                                                );
+                                            }}
                                         />
                                     )
                                 )}
@@ -608,6 +673,21 @@ export default function EventoDetalhes() {
                 }
                 show={showRemoveEntreveniente}
             />
+            {showValidarParticipante && (
+                <ValidarParticipanteModal
+                    setShowValidarParticipante={setShowValidarParticipante}
+                    error={validarError}
+                    handleCaptureAudio={(setValor, valorAouvir) =>
+                        handleCaptureAudio(setValor, valorAouvir)
+                    }
+                    handleValidarParticipante={handleValidarParticipante}
+                    valorNif={nif}
+                    setValorNif={setNif}
+                    valorCodigo={codigo}
+                    setValorCodigo={setCodigo}
+                    micListening={micListening}
+                />
+            )}
             {showExportarEvento && (
                 <main className="fixed flex items-center justify-center h-screen w-screen bg-black/50">
                     <section className="w-fit flex flex-col gap-6 items-center justify-center *:text-center bg-white rounded-2xl p-6">

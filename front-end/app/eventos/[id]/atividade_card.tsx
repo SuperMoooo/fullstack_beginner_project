@@ -13,6 +13,7 @@ export default function AtividadeCard({
     addParticipante,
     revomerEntreveniente,
     revomerParticipante,
+    validarParticipante,
 }: {
     atividade: Atividade;
     editavel?: boolean;
@@ -25,6 +26,7 @@ export default function AtividadeCard({
     addParticipante?: () => void;
     revomerEntreveniente?: () => void;
     revomerParticipante?: () => void;
+    validarParticipante?: () => void;
 }) {
     const estaNaListaEntrevenientes = atividade.lista_entrevenientes?.some(
         (entreveniente) => entreveniente.nome === userNome
@@ -118,6 +120,13 @@ export default function AtividadeCard({
                                 (participante) => participante.nome == userNome
                             )[0].nif + atividade.identificador}
                         </h3>
+                        <button
+                            type="button"
+                            onClick={validarParticipante}
+                            className="cursor-pointer transition duration-300 bg-green-500 hover:bg-green-600 text-black  py-2 px-4 rounded mt-5"
+                        >
+                            Entrar / Validar Atividade
+                        </button>
                     </>
                 ) : (
                     <button

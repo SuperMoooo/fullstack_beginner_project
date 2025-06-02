@@ -27,7 +27,8 @@ export default function TitleInputFile({
                     <>
                         <img
                             src={
-                                valor.type == 'application/vnd.ms-excel'
+                                valor.type == 'application/vnd.ms-excel' ||
+                                valor.type == 'text/csv'
                                     ? 'csv_logo.png'
                                     : valor.type == 'application/pdf'
                                     ? 'pdf_logo.webp'
