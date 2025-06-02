@@ -1,4 +1,7 @@
+import re
+import threading
 from datetime import datetime
+from transformers import pipeline
 
 from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
@@ -11,6 +14,7 @@ from AdminModel import AdminModel
 
 from EventModel import EventModel
 from AtividadesModel import AtividadesModel
+from Comentario import Comentario
 
 from UtilizadorDatabase import UtilizadorDatabase
 from EventDatabase import EventDatabase
@@ -139,9 +143,13 @@ def atualizar_user(nome):
         data = request.get_json()
 
         user = UtilizadorDatabase.get_user_by_nome(nome, collUsers)
-
         if user is None:
             return jsonify({"Erro": "Utilizador não encontrado!"}), 404
+
+        codigos = []
+
+        if user.get_tipo() == "Participante":
+            codigos = user.get_codigos()
 
         # VERIFICAR O TIPO
         updatedUserData = None
@@ -150,7 +158,7 @@ def atualizar_user(nome):
         elif data["tipo"] == "Entreveniente":
             updatedUserData = EntrevenienteModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"] )
         elif data["tipo"] == "Participante":
-            updatedUserData =  ParticipanteModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"], [] )
+            updatedUserData =  ParticipanteModel(data["nome"], data["email"], data["data_nascimento"], data["sexo"], data["nif"], data["password"], data["tipo"], codigos )
 
         UtilizadorDatabase.atualizar_user(updatedUserData, collUsers, nome)
         return jsonify({"Sucesso": "User atualizado com sucesso"}), 200
@@ -168,7 +176,7 @@ def apagar_user(nome):
 
         if user.get_nome() == data["nome"]:
             if user.get_password() == data["password"]:
-                user.apagar_user(collUsers)
+                UtilizadorDatabase.apagar_user(collUsers, user.get_nome())
                 return jsonify({"Sucesso": "A sua conta foi apagada"}), 200
             else:
                 return jsonify({"Erro": "A password não está certa!"}), 400
@@ -177,6 +185,22 @@ def apagar_user(nome):
     except Exception as e:
         print(e)
         return jsonify({"Erro" : str(e)}), 400
+
+
+@app.route("/receber-codigos/<string:nome>", methods=['GET'])
+def get_codigos(nome):
+    try:
+        if nome is None:
+            return jsonify({"Erro", "Sem eventos!"}), 404
+        user = UtilizadorDatabase.get_user_by_nome(nome, collUsers)
+        if user.get_tipo() == "Participante":
+            return jsonify({"codigos": user.get_codigos()}), 200
+        return jsonify({}), 404
+    except Exception as e:
+        print(e)
+        return jsonify({"Erro" : str(e)}), 400
+
+# ::::::::::::: FIM USER ::::::::::::::::
 
 # ::::::::::::: EVENTO ::::::::::::::::
 
@@ -221,6 +245,28 @@ def criar_evento():
             return jsonify({"Sucesso": "Evento criado"}), 200
 
         return jsonify({"Erro" : "Erro ao criar evento"}), 400
+    except Exception as e:
+        return jsonify({"Erro" : str(e)}), 400
+
+@app.route("/atualizar-evento/<int:id>", methods=['PUT'])
+def atualizar_evento(id):
+    try:
+        data = request.get_json()
+        if data is None:
+            return jsonify({"Erro" : "Dados inválidos"}), 400
+        # VERIFICAR PERMISSÕES
+        if data["user_tipo"] != "Admin":
+            return jsonify({"Erro" : "Não tem permissão para atualizar eventos"}), 401
+        evento = EventDatabase.get_evento(id, collEvents)
+        if not evento:
+            return jsonify({"Erro" : "Evento não encontrado"}), 404
+        atividades = [AtividadesModel(AtividadesModel.identificador_aleatorio(), d["data_atividade"], d["hora_atividade"], d["descricao_atividade"], d["localidade_atividade"], d["restricoes"], [],[], []) for d in data["lista_atividades"]]
+        updatedEventoData = EventModel(data["nome_evento"], data["data_evento"], data["capacidade_evento"], [ativi.__dict__ for ativi in atividades])
+        sucess = EventDatabase.atualizar_evento(evento["id"],updatedEventoData, collEvents)
+        if sucess:
+            return jsonify({"Sucesso": "Evento atualizado"}), 200
+
+        return jsonify({"Erro" : "Erro ao atualizar evento"}), 400
     except Exception as e:
         return jsonify({"Erro" : str(e)}), 400
 
@@ -281,6 +327,13 @@ def exportar_evento_pdf(id, lingua):
         print(e)
         return jsonify({"Erro" : str(e)}), 400
 
+
+# ::::::::::::: FIM EVENTO ::::::::::::::::
+
+
+# ::::::::::::: ATIVIDADE ::::::::::::::::
+
+
 # ADICIONAR PARTICIPANTE
 @app.route("/evento/<int:eventoId>/atividade/<string:atividadeId>/adicionar-participante", methods=['PUT'])
 def adicionar_participante(eventoId, atividadeId):
@@ -289,24 +342,33 @@ def adicionar_participante(eventoId, atividadeId):
         if not eventoId or not atividadeId:
             return jsonify({"Erro" : "Evento ou atividade não encontrado"}), 400
 
-        user = UtilizadorDatabase.get_user_by_nome(data["nome_participante"],collUsers)
+        user = UtilizadorDatabase.get_user_by_nome(data["nome_participante"], collUsers)
         if not user :
             return jsonify({"Erro" : "Utilizador não encontrado"}), 400
         if user.get_tipo() != "Participante":
             return jsonify({"Erro" : "Utilizador não é participante"}), 400
-        # VERIFICAR RESTRIÇÕES DA ATIVIDADE
 
-        restricao = EventDatabase.get_atividade(atividadeId, collEvents)
+        # VERIFICAR RESTRIÇÕES DA ATIVIDADE E EVENTO
+        evento = EventDatabase.get_evento(eventoId, collEvents)
+        atividade = EventDatabase.get_atividade(atividadeId, collEvents)
 
+        if int(evento["capacidade_evento"]) == len(atividade["lista_participantes"]):
+            return jsonify({"Erro" : "Este evento já está na capacidade máxima"}), 400
+
+        restricao_idade = re.findall(r"\d+", atividade["restricoes"])
         idade_user = datetime.today().year - int(user.get_data_nascimento().split("/")[2])
 
-        if restricao and int(restricao[0]) > idade_user:
+        if restricao_idade and int(restricao_idade[0]) > idade_user:
             return jsonify({"Erro" : "Utilizador não tem idade suficiente para entrar na atividade"}), 400
+
+
         sucess = EventDatabase.atualizar_atividade_listas_por_campo(atividadeId, user , collEvents, "lista_participantes")
-
-        updated = user.adicionar_codigo(collUsers, atividadeId)
-
+        codigo = user.get_nif() +  atividadeId
+        updated = user.adicionar_codigo(collUsers, codigo)
+        user.set_codigos([codigo])
         if sucess and updated:
+            EventDatabase.remover_user_atividades(atividadeId, user, collEvents, "lista_participantes")
+            EventDatabase.atualizar_atividade_listas_por_campo(atividadeId, user, collEvents, "lista_participantes")
             return jsonify({"Sucesso" : "Participante adicionado"}), 200
         return jsonify({"Erro" : "Não foi possível adicionar o participante"}), 400
     except Exception as e:
@@ -352,7 +414,7 @@ def remover_participante(eventoId, atividadeId):
             return jsonify({"Erro" : "Utilizador não é participante"}), 400
 
         sucess = EventDatabase.remover_user_atividades(atividadeId, user , collEvents, "lista_participantes")
-        # ADICIONAR CODIGOS DOS EVENTOS PARA VALIDAR AO USER
+        user.remover_codigo(collUsers, atividadeId)
         if sucess:
             return jsonify({"Sucesso" : "Participante removido"}), 200
         return jsonify({"Erro" : "Não foi possível remover o participante"}), 400
@@ -384,12 +446,6 @@ def remover_entreveniente(eventoId, atividadeId):
         return jsonify({"Erro" : str(e)}), 400
 
 
-# ::::::::::::: FIM EVENTO ::::::::::::::::
-
-
-# ::::::::::::: ATIVIDADE ::::::::::::::::
-
-
 # VALIDAR INSERIR ATIVIDADE
 @app.route("/validar-atividade", methods=['POST'])
 def validar_atividade():
@@ -409,8 +465,15 @@ def atualizar_atividade(identificador):
         data = request.get_json()
         if identificador is None or data is None:
             return jsonify({"Erro" : "Atividade não encontrada"}), 400
+
+        atividade = EventDatabase.get_atividade(identificador, collEvents)
+        print(len(atividade["lista_participantes"]) > 0 or len(atividade["lista_entrevenientes"]) > 0)
+        if len(atividade["lista_participantes"]) > 0 or len(atividade["lista_entrevenientes"]) > 0:
+            return jsonify({"Erro": "Não pode atualizar a atividade quando existem pessoas já inscritas na mesma"}), 400
+
         updatedAtividade = AtividadesModel(identificador, data["data_atividade"], data["hora_atividade"], data["descricao_atividade"], data["localidade_atividade"], data["restricoes"], [], [], [])
         sucess = EventDatabase.atualizar_atividade(identificador, updatedAtividade,  collEvents)
+
         if sucess:
             return jsonify({"Sucesso": "Atividade atualizada"}), 200
         return jsonify({"Erro": "Não foi possível atualizar a atividade"}), 400
@@ -443,9 +506,65 @@ def ouvir():
             texto = recognizer.recognize_google(audio, language='pt-PT')
             return jsonify({'texto': texto}) , 200
         except sr.UnknownValueError:
-            return jsonify({'texto': 'Não entendi.'}), 404
+            return jsonify({'texto': 'Audio não reconhecido.'}), 404
         except sr.RequestError:
-            return jsonify({'texto': 'Erro na API.'}) , 404
+            return jsonify({'texto': 'Erro desconhecido.'}) , 404
+
+
+@app.route("/validar-codigo/<string:atividadeId>", methods=['POST'])
+def validar_codigo(atividadeId):
+    try:
+        if not atividadeId:
+            return jsonify({"Erro" : "Atividade não encontrada"}), 404
+        data = request.get_json()
+        if not data:
+            return jsonify({"Erro" : "Dados inválidos"}), 404
+
+        nome = data["nome"]
+        codigo = data["codigo"]
+        nif = data["nif"]
+        user = UtilizadorDatabase.get_user_by_nome(nome, collUsers)
+        if not user:
+            return jsonify({"Erro" : "Utilizador não encontrado"}), 404
+
+        res = {}
+        threadAux = threading.Thread(target=EventDatabase.validar_codigo, args=(user, nif, codigo, atividadeId, collUsers, res))
+        threadAux.start()
+        threadAux.join()
+        if res.get("sucesso"):
+            return jsonify({"Sucesso": "O código é válido"}), 200
+
+        return jsonify({"Erro" : "Código inválido"}), 404
+    except Exception as e:
+        print(e)
+        return jsonify({"Erro" : str(e)}), 400
+
+
+@app.route("/atividade/<string:atividadeId>/comentar", methods=['POST'])
+def comentar(atividadeId):
+    try:
+        sentimento_pipeline = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
+        if not atividadeId:
+            return jsonify({"Erro" : "Atividade não encontrada"}), 404
+        data = request.get_json()
+        if not data:
+            return jsonify({"Erro" : "Dados inválidos"}), 404
+        user = UtilizadorDatabase.get_user_by_nome(data["nome"], collUsers)
+        coment = data["comentario"]
+        emocao = sentimento_pipeline(coment)[0]
+        if len(coment) > 100:
+            return jsonify({"Erro" : "O seu comentário não pode exceder mais de 100 caracteres"}), 404
+        comentario = Comentario(user.get_nome(), coment, emocao["label"])
+
+        sucess = EventDatabase.adicionar_comentario(atividadeId, comentario, collEvents)
+        if sucess:
+            return jsonify({"Sucesso" : "Comentário adicionado"}), 200
+        return jsonify({"Erro" : "Erro ao adicionar comentário"}), 404
+
+    except Exception as e:
+        print(e)
+        return jsonify({"Erro" : str(e)}), 400
+
 
 if __name__ == '__main__':
     app.run(debug=True)

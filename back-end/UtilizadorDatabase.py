@@ -17,7 +17,7 @@ class UtilizadorDatabase:
             elif result["tipo"] == "Entreveniente":
                 return EntrevenienteModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"])
             elif result["tipo"] == "Participante":
-                return ParticipanteModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"], [] )
+                return ParticipanteModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"], result["codigos"] )
         return None
 
     # VERIFICAR LOGIN

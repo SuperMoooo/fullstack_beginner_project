@@ -16,12 +16,10 @@ export default function ForgotPassword() {
             e.preventDefault();
             setLoading(true);
             if (nome == '' || password == '' || repeatPassword == '') {
-                alert('Preencha todos os campos!');
                 setError('Preencha todos os campos!');
                 return;
             }
             if (password != repeatPassword) {
-                alert('As senhas não coincidem');
                 setError('As passwords não coincidem');
                 return;
             }
@@ -44,7 +42,6 @@ export default function ForgotPassword() {
                 window.location.href = '/login';
             } else {
                 const errorData = await response.json();
-                alert(errorData['Erro'] || 'Erro desconhecido');
                 setError(errorData['Erro'] || 'Erro desconhecido');
             }
         } catch (error: any) {

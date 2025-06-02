@@ -120,10 +120,14 @@ export default function EventoDetalhes() {
         try {
             e.preventDefault();
             setLoading(true);
-            let day = dataAtividade.split('-')[2];
-            let month = dataAtividade.split('-')[1].split('-')[0];
-            let year = dataAtividade.split('-')[0];
-            const atividadeDate = `${day}/${month}/${year}`;
+
+            let atividadeDate = dataAtividade;
+            if (!dataAtividade.includes('/')) {
+                let day = dataAtividade.split('-')[2];
+                let month = dataAtividade.split('-')[1].split('-')[0];
+                let year = dataAtividade.split('-')[0];
+                atividadeDate = `${day}/${month}/${year}`;
+            }
 
             const token = localStorage.getItem('token');
             const response = await fetch(
@@ -165,7 +169,7 @@ export default function EventoDetalhes() {
                     setAddAtividade(false);
                     getEvento();
                 } else {
-                    const errorData = await response.json();
+                    const errorData = await response2.json();
                     setErrorAtividade(errorData['Erro'] ?? 'Erro desconhecido');
                 }
             } else {
@@ -477,7 +481,86 @@ export default function EventoDetalhes() {
             }
         }
     };
-    const handleValidarParticipante = async () => {};
+    const handleValidarParticipante = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            const response = await fetch(
+                `http://127.0.0.1:5000/validar-codigo/${atividadeIdentificador}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nome: userNome,
+                        codigo: codigo,
+                        nif: nif,
+                    }),
+                }
+            );
+            if (response.ok) {
+                setNif('');
+                setCodigo('');
+                setError('');
+                setValidarError('');
+                getEvento();
+                setShowValidarParticipante(false);
+            } else {
+                const errorData = await response.json();
+                setValidarError(errorData['Erro'] ?? 'Erro desconhecido');
+            }
+        } catch (error: any) {
+            if (error.message.includes('NetworkError')) {
+                setError('Servidor Offline');
+            } else {
+                setError(error.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleComentar = async (id: string, comentario: string) => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            if (comentario == '') {
+                setError('Não pode comentar um comentário vazio');
+                return;
+            }
+            const response = await fetch(
+                `http://127.0.0.1:5000/atividade/${id}/comentar`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        nome: userNome,
+                        comentario: comentario,
+                    }),
+                }
+            );
+            if (response.ok) {
+                setError('');
+                getEvento();
+            } else {
+                const errorData = await response.json();
+                setError(errorData['Erro'] ?? 'Erro desconhecido');
+            }
+        } catch (error: any) {
+            if (error.message.includes('NetworkError')) {
+                setError('Servidor Offline');
+            } else {
+                setError(error.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <main className="grid grid-rows-[auto_1fr] min-h-[100dvh]">
@@ -592,6 +675,9 @@ export default function EventoDetalhes() {
                                                     (prev) => !prev
                                                 );
                                             }}
+                                            handleComentar={(id, comentario) =>
+                                                handleComentar(id, comentario)
+                                            }
                                         />
                                     )
                                 )}

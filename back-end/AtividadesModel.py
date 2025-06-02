@@ -4,6 +4,7 @@ from ParticipanteModel import ParticipanteModel
 import random
 import string
 from EntrevenienteModel import EntrevenienteModel
+from Comentario import Comentario
 
 class AtividadesModel:
 
@@ -17,12 +18,12 @@ class AtividadesModel:
     restricoes : str
     lista_participantes : list[ParticipanteModel]
     lista_entrevenientes : list[EntrevenienteModel]
-    comentarios : list[str]
+    comentarios : list[Comentario]
 
 
     # CONSTRUTOR
 
-    def __init__(self, identificador : str, data_atividade : datetime, hora_atividade : str, descricao_atividade : str, localidade_atividade : str, restricoes : str, lista_participantes: list[ParticipanteModel], lista_entrevenientes : list[EntrevenienteModel],  comentarios : list[str]):
+    def __init__(self, identificador : str, data_atividade : datetime, hora_atividade : str, descricao_atividade : str, localidade_atividade : str, restricoes : str, lista_participantes: list[ParticipanteModel], lista_entrevenientes : list[EntrevenienteModel],  comentarios : list[Comentario]):
         self.identificador = identificador
         if not AtividadesModel.validar_data(data_atividade):
             raise Exception("A data da atividade está num formato inválido")
@@ -107,7 +108,7 @@ class AtividadesModel:
     def set_lista_entrevenientes(self, lista_entrevenientes : list[EntrevenienteModel]):
         self.lista_entrevenientes = lista_entrevenientes
 
-    def set_comentarios(self, comentarios : list[str]):
+    def set_comentarios(self, comentarios : list[Comentario]):
         self.comentarios = comentarios
 
     # FIM ENCAPSULAMENTO

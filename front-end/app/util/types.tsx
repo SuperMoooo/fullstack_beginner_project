@@ -18,7 +18,7 @@ export type Atividade = {
     restricoes: string;
     lista_entrevenientes: Entreveniente[] | undefined;
     lista_participantes: Participante[] | undefined;
-    comentarios: string[] | undefined;
+    comentarios: Comentario[] | undefined;
 };
 
 export type Entreveniente = {
@@ -36,7 +36,7 @@ export type Participante = {
     nif: string;
     password: string;
     tipo: Tipo;
-    codigo: string | undefined;
+    codigos: string[] | undefined;
 };
 
 export type Evento = {
@@ -45,4 +45,10 @@ export type Evento = {
     data_evento: string;
     capacidade_evento: number;
     lista_atividades: Atividade[];
+};
+
+export type Comentario = {
+    nome: string;
+    comentario: string;
+    emocao: string;
 };

@@ -31,7 +31,7 @@ export default function QuestionModal({
                     </button>
                     <button
                         onClick={onConfirm}
-                        className="cursor-pointer transition duration-300 bg-red-500 hover:bg-red-900 text-white font-bold py-2 px-4 rounded mt-5"
+                        className="cursor-pointer transition duration-300 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-5"
                     >
                         Confirmar
                     </button>

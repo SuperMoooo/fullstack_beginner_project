@@ -1,5 +1,5 @@
 import re
-
+from ParticipanteModel import ParticipanteModel
 
 class EventDatabase:
 
@@ -15,11 +15,24 @@ class EventDatabase:
         except Exception as e:
             print(e)
             raise
+
     @staticmethod
     def criar_evento(evento, collection):
         try:
             res = collection.insert_one(evento.__dict__)
             return res.inserted_id
+        except Exception as e:
+            print(e)
+            raise
+
+    @staticmethod
+    def atualizar_evento(eventoId, updatedEvento, collection):
+        try:
+            res = collection.update_one(
+                {"id": eventoId},
+                {"$set": updatedEvento.__dict__}
+            )
+            return res.modified_count
         except Exception as e:
             print(e)
             raise
@@ -72,8 +85,7 @@ class EventDatabase:
             for atividade in evento["lista_atividades"]:
                 # PROCURAR ATIVIDADE CORRETA
                 if atividade["identificador"] == identificador:
-                    restricao_idade = re.findall(r"\d+", atividade["restricoes"])
-                    return restricao_idade
+                    return atividade
 
             return 0
         except Exception as e:
@@ -108,6 +120,7 @@ class EventDatabase:
 
     @staticmethod
     def atualizar_atividade_listas_por_campo(identificador: str, user, collection, campo):
+
         try:
             res = collection.update_one(
                 {"lista_atividades.identificador": identificador},
@@ -138,5 +151,43 @@ class EventDatabase:
             print(e)
             raise
 
+    @staticmethod
+    def validar_codigo(user : ParticipanteModel, nif, codigo, atividadeId, collection, res):
+        try:
+            if user.get_nif() == nif:
+                codigos = user.get_codigos()
+                for c in codigos:
+                    if c == codigo and re.sub(r'^\d{9}', '', c) == atividadeId:
 
+                        sucesso = user.codigo_validado(collection, codigo)
+
+                        codigos = user.get_codigos()
+                        novo_codigos = [c + "VALIDADO" if c == codigo else c for c in codigos]
+                        user.set_codigos(novo_codigos)
+
+                        if not sucesso:
+                            res['sucesso'] = False
+                            return False
+                        res['sucesso'] = True
+                        return True
+            res['sucesso'] = False
+            return False
+        except Exception as e:
+            raise
+
+
+    @staticmethod
+    def adicionar_comentario(atividadeId, comentario, collection):
+        try:
+            res = collection.update_one(
+                {"lista_atividades.identificador": atividadeId},
+                {
+                    "$push": {f"lista_atividades.$[elem].comentarios": comentario.__dict__}
+                },
+                array_filters=[{"elem.identificador": atividadeId}]
+            )
+            return res.modified_count
+        except Exception as e:
+            print(e)
+            raise
 

@@ -42,9 +42,38 @@ class ParticipanteModel(UtilizadorModel, UtilizadorInterface):
             raise
 
 
-    def adicionar_codigo(self, collection, atividade_id):
+    def adicionar_codigo(self, collection, codigo):
         try:
-            updated = collection.update_one({"nome": self.get_nome()}, {"$push": {"codigos": self.get_nif() +  atividade_id}})
+
+            updated = collection.update_one({"nome": self.get_nome()}, {"$push": {"codigos": codigo}})
+
+            return updated.modified_count
+        except Exception as e:
+            print(e)
+            raise
+
+    def remover_codigo(self, collection, atividade_id):
+        try:
+            for codigo in self.get_codigos():
+                if atividade_id in codigo:
+                    updated = collection.update_one(
+                        {"nome": self.get_nome()},
+                        {"$pull": {"codigos": codigo}}
+                    )
+                    return updated.modified_count
+            return 0
+        except Exception as e:
+            print(e)
+            raise
+
+    def codigo_validado(self, collection, codigo):
+        try:
+
+            collection.update_one(
+                {"nome": self.get_nome()},
+                {"$pull": {"codigos": codigo}}
+            )
+            updated = collection.update_one({"nome": self.get_nome()}, {"$push": {"codigos": codigo + "VALIDADO"}})
             return updated.modified_count
         except Exception as e:
             print(e)

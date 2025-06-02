@@ -1,5 +1,7 @@
+'use client';
+import TitleInput from '@/app/components/title_input';
 import { Atividade, Tipo } from '@/app/util/types';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 export default function AtividadeCard({
     atividade,
@@ -14,6 +16,7 @@ export default function AtividadeCard({
     revomerEntreveniente,
     revomerParticipante,
     validarParticipante,
+    handleComentar,
 }: {
     atividade: Atividade;
     editavel?: boolean;
@@ -27,7 +30,10 @@ export default function AtividadeCard({
     revomerEntreveniente?: () => void;
     revomerParticipante?: () => void;
     validarParticipante?: () => void;
+    handleComentar: (id: string, comentario: string) => void;
 }) {
+    const [userCode, setUserCode] = useState<string>('');
+    const [comentario, setComentario] = useState<string>('');
     const estaNaListaEntrevenientes = atividade.lista_entrevenientes?.some(
         (entreveniente) => entreveniente.nome === userNome
     );
@@ -35,6 +41,46 @@ export default function AtividadeCard({
     const estaNaListaParticipantes = atividade.lista_participantes?.some(
         (entreveniente) => entreveniente.nome === userNome
     );
+
+    const participante = atividade.lista_participantes?.find(
+        (p) => p.nome === userNome
+    );
+    let codigo = null;
+    if (participante) {
+        codigo =
+            participante.codigos?.find((cod) =>
+                cod.includes(atividade.identificador)
+            ) ?? '';
+    }
+    useEffect(() => {
+        const getUserCode = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const nome = localStorage.getItem('user_nome');
+                const response = await fetch(
+                    `http://127.0.0.1:5000/receber-codigos/${nome}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                    }
+                );
+                if (response.ok) {
+                    const data = await response.json();
+                    setUserCode(
+                        data['codigos'].find((cod: string) =>
+                            cod.includes(atividade.identificador)
+                        ) ?? ''
+                    );
+                }
+            } catch (error: any) {
+                console.log(error.message);
+            }
+        };
+        getUserCode();
+    }, [codigo]);
 
     return (
         <div className="border border-gray-300 p-6 rounded-2xl gap-2 flex flex-col">
@@ -58,6 +104,23 @@ export default function AtividadeCard({
                                 </h2>
                             )
                         )}
+                    </div>
+                </>
+            )}
+            {(atividade.comentarios?.length ?? 0) > 0 && (
+                <>
+                    <div className="w-full h-[1px] bg-gray-300"></div>
+                    <h2>Comentários:</h2>
+                    <div className="flex flex-col gap-2">
+                        {atividade.comentarios!.map((comentario, index) => (
+                            <div
+                                key={comentario.comentario + index}
+                                className="flex flex-col items-start gap-2"
+                            >
+                                <h2>{comentario.nome}:</h2>
+                                <h3>{comentario.comentario}</h3>
+                            </div>
+                        ))}
                     </div>
                 </>
             )}
@@ -105,7 +168,7 @@ export default function AtividadeCard({
                 ))}
 
             {tipo === 'Participante' &&
-                (estaNaListaParticipantes ? (
+                (estaNaListaParticipantes && !userCode?.includes('VALIDADO') ? (
                     <>
                         <button
                             type="button"
@@ -115,11 +178,7 @@ export default function AtividadeCard({
                             Deixar de Inscrever
                         </button>
                         <h1>Código para entrada:</h1>
-                        <h3>
-                            {atividade.lista_participantes?.filter(
-                                (participante) => participante.nome == userNome
-                            )[0].nif + atividade.identificador}
-                        </h3>
+                        <h3>{codigo ?? ''}</h3>
                         <button
                             type="button"
                             onClick={validarParticipante}
@@ -128,6 +187,27 @@ export default function AtividadeCard({
                             Entrar / Validar Atividade
                         </button>
                     </>
+                ) : userCode?.includes('VALIDADO') ? (
+                    <div>
+                        <TitleInput
+                            titulo="Comentar"
+                            valor={comentario}
+                            setValor={setComentario}
+                        />
+                        <button
+                            onClick={() => {
+                                handleComentar(
+                                    atividade.identificador,
+                                    comentario
+                                );
+                                setComentario('');
+                            }}
+                            type="button"
+                            className="cursor-pointer transition duration-300 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-5"
+                        >
+                            Comentar
+                        </button>
+                    </div>
                 ) : (
                     <button
                         type="button"

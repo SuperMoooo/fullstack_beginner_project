@@ -61,7 +61,7 @@ export default function ValidarParticipanteModal({
                 >
                     Validar
                 </button>
-                {error && <p className="text-red-500 text-sm">{error}</p>}
+                {error && <p className="text-red-500 self-end">{error}</p>}
             </section>
         </main>
     );

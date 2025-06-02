@@ -33,6 +33,14 @@ export default function AtualizarEvento() {
         getEvento();
     }, []);
 
+    const temParticipantes = atividades.some(
+        (ativi: Atividade) => (ativi.lista_participantes?.length ?? 0) > 0
+    );
+
+    const temEntrevenientes = atividades.some(
+        (ativi: Atividade) => (ativi.lista_entrevenientes?.length ?? 0) > 0
+    );
+
     const getEvento = async () => {
         try {
             setLoading(true);
@@ -46,7 +54,6 @@ export default function AtualizarEvento() {
             });
             if (response.ok) {
                 const data = await response.json();
-                console.log(data);
                 setNomeEvento(data['nome_evento']);
                 setCapacidadeEvento(data['capacidade_evento']);
                 setDataEvento(data['data_evento']);
@@ -71,29 +78,53 @@ export default function AtualizarEvento() {
     const handleUpdateEvento = async (e: any) => {
         try {
             e.preventDefault();
-            let day = dataEvento.split('-')[2];
-            let month = dataEvento.split('-')[1].split('-')[0];
-            let year = dataEvento.split('-')[0];
-            const eventDate = `${day}/${month}/${year}`;
+            console.log(atividades);
+
+            if (temParticipantes) {
+                setError(
+                    'Não é possível atualizar evento com participantes inscritos'
+                );
+                return;
+            }
+
+            if (temEntrevenientes) {
+                setError(
+                    'Não é possível atualizar evento com entrevenientes inscritos'
+                );
+                return;
+            }
+
+            let eventDate = dataAtividade;
+            if (!dataAtividade.includes('/')) {
+                let day = dataEvento.split('-')[2];
+                let month = dataEvento.split('-')[1].split('-')[0];
+                let year = dataEvento.split('-')[0];
+                eventDate = `${day}/${month}/${year}`;
+            }
+
             setLoading(true);
             const token = localStorage.getItem('token');
             const tipo = localStorage.getItem('tipo');
-            const response = await fetch('http://127.0.0.1:5000/criar-evento', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    user_tipo: tipo,
-                    nome_evento: nomeEvento,
-                    data_evento: eventDate,
-                    capacidade_evento: capacidadeEvento,
-                    lista_atividades: atividades,
-                }),
-            });
+
+            const response = await fetch(
+                `http://127.0.0.1:5000/atualizar-evento/${id}`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        user_tipo: tipo,
+                        nome_evento: nomeEvento,
+                        data_evento: eventDate,
+                        capacidade_evento: capacidadeEvento,
+                        lista_atividades: atividades,
+                    }),
+                }
+            );
             if (response.ok) {
-                alert('Evento criado com sucesso');
+                alert('Evento atualizado com sucesso');
                 window.location.href = '/';
             } else {
                 const errorData = await response.json();
@@ -109,10 +140,15 @@ export default function AtualizarEvento() {
     const handleCreateAtividade = async (e: any) => {
         try {
             e.preventDefault();
-            let day = dataAtividade.split('-')[2];
-            let month = dataAtividade.split('-')[1].split('-')[0];
-            let year = dataAtividade.split('-')[0];
-            const atividadeDate = `${day}/${month}/${year}`;
+
+            let atividadeDate = dataAtividade;
+            if (!dataAtividade.includes('/')) {
+                let day = dataAtividade.split('-')[2];
+                let month = dataAtividade.split('-')[1].split('-')[0];
+                let year = dataAtividade.split('-')[0];
+                atividadeDate = `${day}/${month}/${year}`;
+            }
+
             setLoading(true);
             const token = localStorage.getItem('token');
             const response = await fetch(
@@ -203,7 +239,21 @@ export default function AtualizarEvento() {
                             key={index}
                             atividade={atividade}
                             eliminavel={true}
+                            tipo={'Admin'}
                             onDelete={() => {
+                                if (temParticipantes) {
+                                    setError(
+                                        'Não é possível atualizar evento com participantes inscritos'
+                                    );
+                                    return;
+                                }
+
+                                if (temEntrevenientes) {
+                                    setError(
+                                        'Não é possível atualizar evento com entrevenientes inscritos'
+                                    );
+                                    return;
+                                }
                                 setAtividades(
                                     atividades.filter(
                                         (ativi: Atividade) =>
@@ -218,6 +268,7 @@ export default function AtualizarEvento() {
                                 setRestricoes('Sem restrições');
                                 setErrorAtividade('');
                             }}
+                            handleComentar={() => {}}
                         />
                     ))}
                     <button
