@@ -13,3 +13,7 @@ E depois fazer npm install no terminal/consola para instalar as dependências do
 
 
 Ficheiro csv usado para import: csv_file_evento.csv
+
+Admin: Administrador do sistema
+Entreveniente: Cantores, músicos, pessoas de palestras, etc
+Participantes: Pessoas que vão ao evento / atividades

@@ -393,34 +393,44 @@ def adicionar_participante(eventoId, atividadeId):
         data = request.get_json()
         if not eventoId or not atividadeId:
             return jsonify({"Erro" : "Evento ou atividade não encontrado"}), 400
+
         # RECEBER USER
         user = UtilizadorDatabase.get_user_by_nome(data["nome_participante"], collUsers)
+
         if not user :
             return jsonify({"Erro" : "Utilizador não encontrado"}), 400
+
+        # SE NÃO FOR PARTICIPANTE ENTÃO RETORNA
         if user.get_tipo() != "Participante":
             return jsonify({"Erro" : "Utilizador não é participante"}), 400
 
-        # VERIFICAR RESTRIÇÕES DA ATIVIDADE E EVENTO
+        # RECEBE EVENTO E ATIVIDADE
         evento = EventDatabase.get_evento(eventoId, collEvents)
         atividade = EventDatabase.get_atividade(atividadeId, collEvents)
-
+        # SE A CAPACIDADE JÁ ESTIVER NO MÁXIMO ENTÃO RETORNA
         if int(evento["capacidade_evento"]) == len(atividade["lista_participantes"]):
             return jsonify({"Erro" : "Este evento já está na capacidade máxima"}), 400
 
+        # VAI BUSCAR TODOS OS NÚMEROS NA RETRIÇÃO, EX.: (MAIORES 18) -> ['18']
         restricao_idade = re.findall(r"\d+", atividade["restricoes"])
+        # RETORNA IDADE DO USER
         idade_user = datetime.today().year - int(user.get_data_nascimento().split("/")[2])
 
+        # SE EXISTE RESTRIÇÃO E A RESTRIÇÃO (IDADE) FOR MAIOR QUE A IDADE DO USER ENTÃO NEGA PARTICIPAÇÃO
         if restricao_idade and int(restricao_idade[0]) > idade_user:
             return jsonify({"Erro" : "Utilizador não tem idade suficiente para entrar na atividade"}), 400
 
-
+        # DEFINE O CÓDIGO
         codigo = user.get_nif() +  atividadeId
+        # ATUALIZA O CÓDIGO
         updated = user.adicionar_codigo(collUsers, codigo)
+        # ADICIONA AO USER O CÓDIGO PARA DEPOIS ADICIONAR O USER Á LISTA DE PARTICIPANTES
         user.set_codigos([codigo])
         EventDatabase.atualizar_atividade_listas_por_campo(atividadeId, user, collEvents, "lista_participantes")
 
         if updated:
             return jsonify({"Sucesso" : "Participante adicionado"}), 200
+
         return jsonify({"Erro" : "Não foi possível adicionar o participante"}), 400
     except Exception as e:
         print(e)
@@ -433,17 +443,22 @@ def adicionar_entreveniente(eventoId, atividadeId):
         data = request.get_json()
         if not eventoId or not atividadeId:
             return jsonify({"Erro" : "Evento ou atividade não encontrado"}), 400
+
         # RECEBER USER
         user = UtilizadorDatabase.get_user_by_nome(data["nome_entreveniente"],collUsers)
         if not user :
             return jsonify({"Erro" : "Utilizador não encontrado"}), 400
+
+        # SE NÃO FOR ENTREVENIENTE ENTÃO RETORNA
         if user.get_tipo() != "Entreveniente":
             return jsonify({"Erro" : "Utilizador não é entreveniente"}), 400
 
+        # ADICIONA O ENTREVENIENTE Á ATIVIDADE
         sucess = EventDatabase.atualizar_atividade_listas_por_campo(atividadeId, user , collEvents, "lista_entrevenientes")
 
         if sucess:
             return jsonify({"Sucesso" : "Entreveniente adicionado"}), 200
+
         return jsonify({"Erro" : "Não foi possível adicionar o entreveniente"}), 400
     except Exception as e:
         print(e)
@@ -457,40 +472,53 @@ def remover_participante(eventoId, atividadeId):
         data = request.get_json()
         if not eventoId or not atividadeId:
             return jsonify({"Erro" : "Evento ou atividade não encontrado"}), 400
+
         # RECEBER USER
         user = UtilizadorDatabase.get_user_by_nome(data["nome_participante"],collUsers)
         if not user :
             return jsonify({"Erro" : "Utilizador não encontrado"}), 400
+
+        # SE NÃO FOR PARTICIPANTE ENTÃO RETORNA
         if user.get_tipo() != "Participante":
             return jsonify({"Erro" : "Utilizador não é participante"}), 400
 
+        # REMOVE PARTICIPANTE E O SEU CÓDIGO
         sucess = EventDatabase.remover_user_atividades(atividadeId, user.get_nome() , collEvents, "lista_participantes")
         user.remover_codigo(collUsers, atividadeId)
+
         if sucess:
             return jsonify({"Sucesso" : "Participante removido"}), 200
+
         return jsonify({"Erro" : "Não foi possível remover o participante"}), 400
     except Exception as e:
         print(e)
         return jsonify({"Erro" : str(e)}), 400
 
-# REMOVER Entreveniente
+# REMOVER ENTREVENIENTE
 @app.route("/evento/<int:eventoId>/atividade/<string:atividadeId>/remover-entreveniente", methods=['PUT'])
 def remover_entreveniente(eventoId, atividadeId):
     try:
         data = request.get_json()
+
         if not eventoId or not atividadeId:
             return jsonify({"Erro" : "Evento ou atividade não encontrado"}), 400
+
         # RECEBER USER
         user = UtilizadorDatabase.get_user_by_nome(data["nome_entreveniente"],collUsers)
         if not user :
             return jsonify({"Erro" : "Utilizador não encontrado"}), 400
+
+        # SE NÃO FOR ENTREVENIENTE ENTÃO RETORNA
         if user.get_tipo() != "Entreveniente":
             return jsonify({"Erro" : "Utilizador não é entreveniente"}), 400
 
+        # REMOVE ENTREVENIENTE
         sucess = EventDatabase.remover_user_atividades(atividadeId, user.get_nome() , collEvents, "lista_entrevenientes")
-        # ADICIONAR EVENTOS IDS AO USER
+
+
         if sucess:
             return jsonify({"Sucesso" : "Entreveniente removido"}), 200
+
         return jsonify({"Erro" : "Não foi possível remover o entreveniente"}), 400
     except Exception as e:
         print(e)
@@ -504,6 +532,7 @@ def validar_atividade():
         data = request.get_json()
         if data is None:
             return jsonify({"Erro" : "Dados inválidos"}), 400
+        # VALIDA ATIVIDADE
         AtividadesModel("" ,data["data_atividade"], data["hora_atividade"], data["descricao_atividade"], data["localidade_atividade"], data["restricoes"], [], [], [])
         return jsonify({"Sucesso": "Atividade validada com sucesso"}), 200
     except Exception as e:
@@ -518,16 +547,20 @@ def atualizar_atividade(atividadeId):
         if atividadeId is None or data is None:
             return jsonify({"Erro" : "Atividade não encontrada"}), 400
 
+        # RECEBE ATIVIDADE
         atividade = EventDatabase.get_atividade(atividadeId, collEvents)
-        print(len(atividade["lista_participantes"]) > 0 or len(atividade["lista_entrevenientes"]) > 0)
+
+        # SE HOVER PARTICIPANTES OU ENTREVENIENTES EXISTENTES NUMA ATIVIDADE ENTÃO RETORNA ERRO
         if len(atividade["lista_participantes"]) > 0 or len(atividade["lista_entrevenientes"]) > 0:
             return jsonify({"Erro": "Não pode atualizar a atividade quando existem pessoas já inscritas na mesma"}), 400
 
+        # ATUALIZA ATIVIDADE
         updatedAtividade = AtividadesModel(atividadeId, data["data_atividade"], data["hora_atividade"], data["descricao_atividade"], data["localidade_atividade"], data["restricoes"], [], [], [])
         sucess = EventDatabase.atualizar_atividade(atividadeId, updatedAtividade,  collEvents)
 
         if sucess:
             return jsonify({"Sucesso": "Atividade atualizada"}), 200
+
         return jsonify({"Erro": "Não foi possível atualizar a atividade"}), 400
     except Exception as e:
         print(e)
@@ -540,6 +573,8 @@ def eliminar_atividade(atividadeId):
     try:
         if not atividadeId:
             return jsonify({"Erro" : "Atividade não encontrada"}), 404
+
+        # ELIMINA ATIVIDADE (NESTE CONTEXTO MUITO ESPECÍFICO A VERIFICAÇÃO DE USERS EXISENTES NA ATIVIDADE É FEITA NO FRONT-END)
         sucess = EventDatabase.delete_atividade(atividadeId, collEvents)
         if sucess:
             return jsonify({"Sucesso": "Atividade removida com sucesso"}), 200
@@ -571,6 +606,7 @@ def validar_codigo(atividadeId):
     try:
         if not atividadeId:
             return jsonify({"Erro" : "Atividade não encontrada"}), 404
+
         data = request.get_json()
         if not data:
             return jsonify({"Erro" : "Dados inválidos"}), 404
@@ -583,9 +619,13 @@ def validar_codigo(atividadeId):
         if not user:
             return jsonify({"Erro" : "Utilizador não encontrado"}), 404
 
+        # USA UMA VAR PARA SABER O SUCESSO DA VALIDAÇÃO
         res = {}
+        # CRIA THREAD
         threadAux = threading.Thread(target=EventDatabase.validar_codigo, args=(user, nif, codigo, atividadeId, collUsers, res))
+        # COMEÇA
         threadAux.start()
+        # ESPERA RESULTADO
         threadAux.join()
         if res.get("sucesso"):
             return jsonify({"Sucesso": "O código é válido"}), 200
@@ -600,23 +640,33 @@ def validar_codigo(atividadeId):
 @app.route("/atividade/<string:atividadeId>/comentar", methods=['POST'])
 def comentar(atividadeId):
     try:
+        # INICIA O MODEL USADO ( 1-5 ESTRELAS )
         sentimento_pipeline = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
+
         if not atividadeId:
             return jsonify({"Erro" : "Atividade não encontrada"}), 404
+
         data = request.get_json()
         if not data:
             return jsonify({"Erro" : "Dados inválidos"}), 404
+
         # RECEBER USER
         user = UtilizadorDatabase.get_user_by_nome(data["nome"], collUsers)
         coment = data["comentario"]
+        # AVALIA EMOÇÃO DO COMENTÁRIO
         emocao = sentimento_pipeline(coment)[0]
+        # SE TIVER MAIS DE 100 CHARS RETORNA ERRO
         if len(coment) > 100:
             return jsonify({"Erro" : "O seu comentário não pode exceder mais de 100 caracteres"}), 404
+
+        # CRIA OBJETO
         comentario = Comentario(user.get_nome(), coment, emocao["label"])
 
+        # ADICIONA COMENTÁRIO
         sucess = EventDatabase.adicionar_comentario(atividadeId, comentario, collEvents)
         if sucess:
             return jsonify({"Sucesso" : "Comentário adicionado"}), 200
+
         return jsonify({"Erro" : "Erro ao adicionar comentário"}), 404
 
     except Exception as e:
