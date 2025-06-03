@@ -11,7 +11,7 @@ export default function Navbar({
     isConta?: boolean;
 }) {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-    const [tipo, setTipo] = useState<Tipo>('user');
+    const [tipo, setTipo] = useState<Tipo>('Participante');
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -27,6 +27,8 @@ export default function Navbar({
             // Token is expired or doesn't exist
             localStorage.removeItem('token');
             localStorage.removeItem('token_limite');
+            localStorage.removeItem('tipo');
+            localStorage.removeItem('user_nome');
             setIsAuthenticated(false);
         }
     }, []);

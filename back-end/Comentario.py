@@ -5,7 +5,7 @@ class Comentario:
     emocao : str
 
     # CONSTRUTOR
-    def __init__(self, nome, comentario, emocao):
+    def __init__(self, nome : str, comentario : str, emocao : str):
         self.nome = nome
         self.comentario = comentario
         self.emocao = emocao
@@ -25,13 +25,13 @@ class Comentario:
 
     # SETS
 
-    def set_nome(self, nome):
+    def set_nome(self, nome : str):
         self.nome = nome
 
-    def set_comentario(self, comentario):
+    def set_comentario(self, comentario: str):
         self.comentario = comentario
 
-    def set_emocao(self, emocao):
+    def set_emocao(self, emocao: str):
         self.emocao = emocao
 
     # FIM ENCAPSULAMENTO

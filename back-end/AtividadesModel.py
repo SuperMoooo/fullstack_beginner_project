@@ -25,12 +25,15 @@ class AtividadesModel:
 
     def __init__(self, identificador : str, data_atividade : datetime, hora_atividade : str, descricao_atividade : str, localidade_atividade : str, restricoes : str, lista_participantes: list[ParticipanteModel], lista_entrevenientes : list[EntrevenienteModel],  comentarios : list[Comentario]):
         self.identificador = identificador
+        # VALIDAR FORMATO DA DATA
         if not AtividadesModel.validar_data(data_atividade):
             raise Exception("A data da atividade está num formato inválido")
         self.data_atividade = data_atividade
+        # VALIDAR FORMATO DA HORA
         if not AtividadesModel.validar_hora(hora_atividade):
             raise Exception("A hora da atividade está num formato inválido")
         self.hora_atividade = hora_atividade
+
         if descricao_atividade == '':
             raise Exception("A descrição da atividade não pode ser vazia")
         self.descricao_atividade = descricao_atividade
@@ -80,11 +83,13 @@ class AtividadesModel:
     # SETS
 
     def set_data_atividade(self, data_atividade : datetime):
+        # VALIDAR FORMATO DA DATA
         if not AtividadesModel.validar_data(data_atividade):
             raise Exception("A data da atividade está num formato inválido")
         self.data_atividade = data_atividade
 
     def set_hora_atividade(self, hora_atividade : str):
+        # VALIDAR FORMATO DA HORA
         if not AtividadesModel.validar_hora(hora_atividade):
             raise Exception("A hora da atividade está num formato inválido")
         self.hora_atividade = hora_atividade
@@ -126,5 +131,7 @@ class AtividadesModel:
 
     @staticmethod
     def identificador_aleatorio():
+        # VAI FICAR UMA STRING COM TODAS AS ASCCI + TODOS OS DIGITOS
         caracteres = string.ascii_letters + string.digits
+        # RETORNA 15 CHARS ALEATORIOS E JUNTA TUDO
         return ''.join(random.choices(caracteres, k=15))

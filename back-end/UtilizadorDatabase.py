@@ -1,6 +1,9 @@
+import re
+
 from AdminModel import AdminModel
 from ParticipanteModel import ParticipanteModel
 from EntrevenienteModel import EntrevenienteModel
+from EventDatabase import EventDatabase
 
 class UtilizadorDatabase:
     def __init__(self):
@@ -45,10 +48,17 @@ class UtilizadorDatabase:
 
     # ATUALIZAR USER
     @staticmethod
-    def atualizar_user(updatedUserData, collection, nome):
+    def atualizar_user(updatedUserData, collection, nome, eventColl):
         try:
             collection.delete_one({"nome": nome})
             collection.insert_one(updatedUserData.__dict__)
+
+            if updatedUserData.get_tipo() == "Participante":
+                codigos = updatedUserData.get_codigos()
+                for codigo in codigos:
+                    atividadeId = re.sub(r'^\d{9}', '', codigo)
+                    EventDatabase.remover_user_atividades(atividadeId, nome, eventColl, "lista_participantes")
+                    EventDatabase.atualizar_atividade_listas_por_campo(atividadeId, updatedUserData, eventColl, "lista_participantes")
             return True
         except Exception as e:
             print(e)

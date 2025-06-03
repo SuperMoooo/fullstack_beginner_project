@@ -14,18 +14,22 @@ class EventModel:
 
     # CONSTRUTOR
     def __init__(self, nome_evento : str, data_evento :  datetime, capacidade_evento : int, lista_atividades : list[AtividadesModel]):
-        self.id = EventModel.get_id()
+        # RETORNA O PROXIMO ID PARA NÃO SE REPETIR
+        self.id = EventModel.get_last_id()
+
         if nome_evento == '':
             raise Exception('O nome do evento não pode ser vazio')
         self.nome_evento = nome_evento
+
+        # VALIDAR FORMATO DA DATA
         if not EventModel.validar_data(data_evento):
             raise Exception("A data do evento está num formato inválido")
         self.data_evento = data_evento
 
-        if int(capacidade_evento) < 0:
+        # VALIDA SE A CAPACIDADE NÃO É 0 OU NEGATIVA
+        if int(capacidade_evento) <= 0:
             raise Exception("A capacidade do evento têm de ser maior que 0")
         self.capacidade_evento = capacidade_evento
-
 
         if not lista_atividades:
             raise Exception("Lista de Atividades vazia, adicione pelo menos 1 atividade")
@@ -64,11 +68,13 @@ class EventModel:
         self.nome_evento = nome_evento
 
     def set_data_evento(self, data_evento : datetime):
+        # VALIDAR FORMATO DA DATA
         if not EventModel.validar_data(data_evento):
             raise Exception("A data do evento está num formato inválido")
         self.data_evento = data_evento
 
     def set_capacidade_evento(self, capacidade_evento : int):
+        # VALIDA SE A CAPACIDADE NÃO É 0 OU NEGATIVA
         if int(capacidade_evento) < 0:
             raise Exception("A capacidade do evento têm de ser maior que 0")
         self.capacidade_evento = capacidade_evento
@@ -94,7 +100,7 @@ class EventModel:
 
 
     @staticmethod
-    def get_id() -> int:
+    def get_last_id() -> int:
         client = MongoClient("mongodb://localhost:27017/")
         db = client["2_freq"]
         collEvents = db["events"]

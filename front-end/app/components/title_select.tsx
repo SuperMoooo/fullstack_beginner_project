@@ -5,16 +5,19 @@ export default function TitleSelect({
     setValor,
     valores,
     initialValor,
+    readOnly,
 }: {
     title: string;
     setValor: any;
     valores: string[];
     initialValor?: string;
+    readOnly?: boolean;
 }) {
     return (
         <div className="w-full flex items-start justify-between flex-col gap-2">
             <h1 className="text-lg">{title}</h1>
             <select
+                disabled={readOnly}
                 value={initialValor}
                 name="tipo"
                 id="tipo"

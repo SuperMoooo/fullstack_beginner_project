@@ -1,5 +1,10 @@
 Back-end:
-pip install fpdf flask flask_cors pymongo spacy googletrans PyMuPDF speech_recognition
+pip install fpdf flask flask_cors pymongo spacy googletrans==4.0.0-rc1 PyMuPDF speech_recognition
+
+Spacy:
+python -m spacy download pt_core_news_lg
+python -m spacy download en_core_web_trf
+python -m spacy download it_core_news_lg
 
 Front-end:
 

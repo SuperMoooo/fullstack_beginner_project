@@ -48,6 +48,7 @@ export default function UpdateDataForm({
                 setValor={setTipo}
                 valores={['Admin', 'Entreveniente', 'Participante']}
                 initialValor={tipo}
+                readOnly={true}
             />
 
             <TitleInput
