@@ -18,6 +18,7 @@ export default function Navbar({
         const limite = localStorage.getItem('token_limite');
         const tipo = localStorage.getItem('tipo');
 
+        // SE A DATA AGORA FOR MENOR QUE A DATA DAQUI A 1 HORA DESDE O LOGIN ENTÃO PASSA SENÃO ERRO
         if (token && limite && Date.now() < parseInt(limite, 10)) {
             setIsAuthenticated(true);
             if (tipo) {

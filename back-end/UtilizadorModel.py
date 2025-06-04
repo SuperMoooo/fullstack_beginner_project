@@ -16,26 +16,32 @@ class UtilizadorModel:
             raise Exception('O nome não pode ser vazio')
         self.nome = nome
 
+        # VALIDAR FORMATO EMAIL
         if not self.verificar_email(email):
             raise Exception('Email invalido!')
         self.email = email
 
+        # VALIDAR FORMATO DATA
         if not self.verificar_data(data_nascimento):
             raise Exception('Data nascimento invalida!')
         self.data_nascimento = data_nascimento
 
+        # VALIDAR SEXO
         if not self.verificar_sexo(sexo):
             raise Exception('Sexo invalido!')
         self.sexo = sexo
 
+        # VALIDAR FORMATO DO NIF
         if not self.verificar_nif(nif):
             raise Exception('Nif invalido!')
         self.nif = nif
 
+        # VALIDAR PASSWORD
         if not self.verificar_password(password):
             raise Exception('A password deve ter mais de 6 caracteres!')
         self.password = password
 
+        # VALIDAR TIPO
         if not self.verificar_tipo(tipo):
             raise Exception('Tipo invalido!')
         self.tipo = tipo
@@ -75,31 +81,37 @@ class UtilizadorModel:
         self.nome = nome
 
     def set_email(self, email : str):
+        # VALIDAR FORMATO EMAIL
         if not self.verificar_email(email):
             raise Exception('Email invalido')
         self.email = email
 
     def set_data_nascimento(self, data_nascimento : datetime):
+        # VALIDAR FORMATO DATA
         if not self.verificar_data(data_nascimento):
             raise Exception('Data nascimento invalida!')
         self.data_nascimento = data_nascimento
 
     def set_sexo(self, sexo : str):
+        # VALIDAR SEXO
         if not self.verificar_sexo(sexo):
             raise Exception('Sexo invalido!')
         self.sexo = sexo
 
     def set_nif(self, nif : str):
+        # VALIDAR FORMATO DO NIF
         if not self.verificar_nif(nif):
             raise Exception('Nif invalido!')
         self.nif = nif
 
     def set_password(self, password : str):
+        # VALIDAR PASSWORD
         if not self.verificar_password(password):
             raise Exception('A password deve ter mais de 6 caracteres!')
         self.password = password
 
     def set_tipo(self, tipo : str):
+        # VALIDAR TIPO
         if not self.verificar_tipo(tipo):
             raise Exception('Tipo invalido!')
         self.tipo = tipo
@@ -126,15 +138,15 @@ class UtilizadorModel:
 
     @staticmethod
     def verificar_tipo(tipo : str):
-        # VERIFICAR FORMATO DA DATA (dd/mm/yyyy)
+        # VERIFICAR SE É UM DOS 3 TIPOS
         return re.fullmatch(r"admin|entreveniente|participante", tipo.lower())
 
     @staticmethod
     def verificar_sexo(sexo : str):
-        # VALIDAR NIF SE 9 digitos
+        # VALIDAR SEXO
         return re.fullmatch(r"homem|mulher|outro|prefiro não dizer", sexo.lower())
 
     @staticmethod
     def verificar_nif(nif : str):
-        # VALIDAR NIF SE 9 digitos
+        # VALIDAR SE O NIF TEM SÓ 9 digitos
         return re.fullmatch(r"\d{9}$", nif)

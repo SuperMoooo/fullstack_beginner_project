@@ -1,13 +1,13 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
-import TitleInput from '../components/title_input';
 import { Sexo, Tipo } from '../util/types';
 import Loading from '../components/loading';
 import UpdateDataForm from './updateDataForm';
 import DeleteAccountForm from './deleteAccountForm';
 
 export default function Account() {
+    // UPDATE FORM
     const [nome, setNome] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [data_nascimento, setDataNascimento] = useState<string>('');
@@ -17,7 +17,9 @@ export default function Account() {
     const [sexo, setSexo] = useState<Sexo>('Homem');
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
+    // INDEX PARA TROCAR FORMS
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
+    // DELETE FORM
     const [deleteNome, setDeleteNome] = useState<string>('');
     const [deletePassword, setDeletePassword] = useState<string>('');
     const [confirmDeletePassword, setConfirmDeletePassword] =
@@ -66,6 +68,7 @@ export default function Account() {
             setLoading(false);
         }
     };
+
     // ATUALIZAR
     const handleUpdateUserInfo = async (e: any) => {
         try {

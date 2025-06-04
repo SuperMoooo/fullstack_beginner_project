@@ -3,6 +3,7 @@ import re
 from AdminModel import AdminModel
 from ParticipanteModel import ParticipanteModel
 from EntrevenienteModel import EntrevenienteModel
+
 from EventDatabase import EventDatabase
 
 class UtilizadorDatabase:
@@ -12,9 +13,10 @@ class UtilizadorDatabase:
     # RETORNAR USER BY NOME
     @staticmethod
     def get_user_by_nome(nome : str, collection):
-        user = collection.find({"nome": nome})
-        if user:
-            result = user[0]
+        # ENCONTRA O USER NO MONGO
+        result = collection.find_one({"nome": nome})
+        # E DEPOIS ATRIBUI O OBJETO DEPENDENDO DO TIPO
+        if result:
             if result["tipo"] == "Admin":
                 return AdminModel(result["nome"], result["email"], result["data_nascimento"], result["sexo"], result["nif"], result["password"], result["tipo"])
             elif result["tipo"] == "Entreveniente":
@@ -27,7 +29,9 @@ class UtilizadorDatabase:
     @staticmethod
     def check_login(collection, nome, password : str):
         try:
+            # RECEBE O USER
             user = UtilizadorDatabase.get_user_by_nome(nome, collection)
+            # VERIFICA SE A PASSWORD CORRESPONDE
             if user.get_password() == password:
                 return user
             return None
@@ -50,14 +54,19 @@ class UtilizadorDatabase:
     @staticmethod
     def atualizar_user(updatedUserData, collection, nome, eventColl):
         try:
+            # REMOVE O USER
             collection.delete_one({"nome": nome})
+            # ADICIONA O USER NOVAMENTE COM OS DADOS ATUALIZADOS
             collection.insert_one(updatedUserData.__dict__)
 
+            # SE ELE FOR PARTICIPANTE VAI TER CÓDIGOS
             if updatedUserData.get_tipo() == "Participante":
                 codigos = updatedUserData.get_codigos()
                 for codigo in codigos:
                     atividadeId = re.sub(r'^\d{9}', '', codigo)
+                    # COMO O USER ESTÁ EM ATIVIDADES ENTÃO VAMOS REMOVÊ-LO
                     EventDatabase.remover_user_atividades(atividadeId, nome, eventColl, "lista_participantes")
+                    # E ADICIONAR OS NOVOS DADOS DO USER
                     EventDatabase.atualizar_atividade_listas_por_campo(atividadeId, updatedUserData, eventColl, "lista_participantes")
             return True
         except Exception as e:

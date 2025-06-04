@@ -24,7 +24,6 @@ class ParticipanteModel(UtilizadorModel, UtilizadorInterface):
 
     # SETS
 
-
     def set_codigos(self, codigos : list[str]):
         self.codigos = codigos
 
@@ -32,7 +31,7 @@ class ParticipanteModel(UtilizadorModel, UtilizadorInterface):
 
     # FUNCS
 
-    # CRIAR ADMIN
+
     def criar_user(self, collection) -> bool:
         try:
             collection.insert_one(self.__dict__)
@@ -44,9 +43,8 @@ class ParticipanteModel(UtilizadorModel, UtilizadorInterface):
 
     def adicionar_codigo(self, collection, codigo):
         try:
-
+            # ADICIONA UM NOVO CÓDIGO DE ATIVIDADE
             updated = collection.update_one({"nome": self.get_nome()}, {"$push": {"codigos": codigo}})
-
             return updated.modified_count
         except Exception as e:
             print(e)
@@ -54,6 +52,7 @@ class ParticipanteModel(UtilizadorModel, UtilizadorInterface):
 
     def remover_codigo(self, collection, atividade_id):
         try:
+            # VÊ OS CÓDIGOS DO USER E REMOVE O ESPECIFICO DA ATIVIDADE
             for codigo in self.get_codigos():
                 if atividade_id in codigo:
                     updated = collection.update_one(
@@ -68,7 +67,7 @@ class ParticipanteModel(UtilizadorModel, UtilizadorInterface):
 
     def codigo_validado(self, collection, codigo):
         try:
-
+            # VALIDA O CÓDIGO REMOVENDO PRIMEIRO E ADICIONANDO O NOVO VALIDADO
             collection.update_one(
                 {"nome": self.get_nome()},
                 {"$pull": {"codigos": codigo}}

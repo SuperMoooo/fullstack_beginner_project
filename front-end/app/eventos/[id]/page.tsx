@@ -273,6 +273,7 @@ export default function EventoDetalhes() {
                 document.body.appendChild(link);
                 link.click();
                 link.parentNode?.removeChild(link);
+                setError('');
             } else {
                 const errorData = await response.json();
                 setError(errorData['Erro'] ?? 'Erro desconhecido');

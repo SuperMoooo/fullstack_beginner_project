@@ -11,6 +11,7 @@ export default function ForgotPassword() {
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
 
+    // RESETAR PASSWORD
     const handleResetPassword = async (e: any) => {
         try {
             e.preventDefault();
